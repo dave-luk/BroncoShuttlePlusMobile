@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/green"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.dave_cs.broncoshuttleplus.MainMenuActivity"
+    tools:showIn="@layout/activity_main"
+    android:id="@+id/main_pane">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.3">
+
+            <ImageButton
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/main_logo"
+                android:src="@drawable/ic_bronco_shuttle"
+                android:scaleType="fitCenter"
+                android:background="#00ffffff"
+                android:longClickable="true"
+                android:contentDescription="@string/main_menu_main_logo_caption" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7">
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textClock" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/CenterVStrut"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/linearLayout">
+
+                <ImageButton
+                    android:scaleType="fitXY"
+                    android:background="@android:color/transparent"
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:id="@+id/liveMapImageButton"
+                    android:src="@drawable/load_live_map"
+                    android:contentDescription="@string/main_menu_liveMap_caption" />
+
+                <ImageButton
+                    android:scaleType="fitXY"
+                    android:background="@android:color/transparent"
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:id="@+id/detailsViewImageButton"
+                    android:src="@drawable/load_details"
+                    android:contentDescription="@string/main_menu_details_caption" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:id="@+id/CenterVStrut"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true">
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/CenterVStrut"
+                android:layout_alignLeft="@+id/linearLayout"
+                android:layout_alignStart="@+id/linearLayout">
+
+                <ImageButton
+                    android:scaleType="fitXY"
+                    android:background="@android:color/transparent"
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:id="@+id/navigationImageButton"
+                    android:src="@drawable/ic_navigation_icon"
+                    android:contentDescription="@string/main_menu_nav_caption" />
+
+                <ImageButton
+                    android:scaleType="fitXY"
+                    android:background="@android:color/transparent"
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:id="@+id/optionsImageButton"
+                    android:src="@drawable/ic_options_icon"
+                    android:contentDescription="@string/main_menu_options_caption" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/main_menu_copyright"
+                android:id="@+id/textView"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:textColor="#ffffff"
+                android:textIsSelectable="false" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/CenterHStrut"></LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>
