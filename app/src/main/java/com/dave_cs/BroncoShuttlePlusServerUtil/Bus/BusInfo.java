@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 public class BusInfo implements Comparable
 {
-    private String busName;
+    private String bus;
     private int fullness;
     private int lastUpdate;
     private String nextStop;
@@ -18,7 +18,7 @@ public class BusInfo implements Comparable
     {
         try
         {
-            this.busName = obj.getString("busName");
+            this.bus = obj.getString("busName");
             this.fullness = obj.getInt("fullness");
             this.lastUpdate = obj.getInt("lastUpdate");
             this.nextStop = obj.getString("nextStop");
@@ -31,7 +31,7 @@ public class BusInfo implements Comparable
 
     public BusInfo()
     {
-        this.busName = "Unavailable!";
+        this.bus = "Unavailable!";
         this.fullness = 0;
         this.lastUpdate = 0;
         this.nextStop = "";
@@ -39,7 +39,7 @@ public class BusInfo implements Comparable
 
 
     public String getBusName() {
-        return busName;
+        return bus;
     }
 
     public int getFullness() {
@@ -57,7 +57,7 @@ public class BusInfo implements Comparable
     @Override
     public int compareTo(Object another) {
         if(another instanceof BusInfo)
-            return this.busName.compareTo(((BusInfo) another).getBusName().toString());
+            return this.bus.compareTo(((BusInfo) another).getBusName());
         else
             return this.hashCode() - another.hashCode();
     }

@@ -118,7 +118,10 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                         routeInfo = response.body();
                         busInfoList = routeInfo.getBusOnRoute();
                         stopInfoList = routeInfo.getStopsOnRoute();
+                        busInfoList.add(new BusInfo());
+                        stopInfoList.add(new StopInfo());
                         listAdapter.notifyDataSetChanged();
+                        Log.i("TEST", listAdapter.getGroupCount() + " " + listAdapter.getChild(1, 0));
                     } else {
                         Log.d("<Error>", "" + response.code());
                     }
@@ -127,6 +130,7 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                 @Override
                 public void onFailure(Throwable t) {
                     Log.e("<Error>", t.getLocalizedMessage());
+                    Log.i("TEST", listAdapter.getGroupCount() + " " + listAdapter.getChild(1, 0));
                 }
             });
     }

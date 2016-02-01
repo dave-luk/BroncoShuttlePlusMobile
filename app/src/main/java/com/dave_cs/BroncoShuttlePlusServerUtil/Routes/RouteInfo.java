@@ -1,7 +1,6 @@
 package com.dave_cs.BroncoShuttlePlusServerUtil.Routes;
 
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.BusStop;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 
 import org.json.JSONArray;
@@ -9,8 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-
-import retrofit2.http.Path;
 
 /**
  * Created by David on 1/25/2016.
