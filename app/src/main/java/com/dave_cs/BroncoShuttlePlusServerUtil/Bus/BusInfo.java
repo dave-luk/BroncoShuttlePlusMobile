@@ -38,7 +38,7 @@ public class BusInfo implements Comparable
     }
 
 
-    public String getBusName() {
+    public String getBus() {
         return bus;
     }
 
@@ -57,7 +57,7 @@ public class BusInfo implements Comparable
     @Override
     public int compareTo(Object another) {
         if(another instanceof BusInfo)
-            return this.bus.compareTo(((BusInfo) another).getBusName());
+            return this.bus.compareTo(((BusInfo) another).getBus());
         else
             return this.hashCode() - another.hashCode();
     }

@@ -50,7 +50,7 @@ public class BusInfoAdapter extends ArrayAdapter<BusInfo>{
         }
         // Populate the data into the template view using the data object
 
-        viewHolder.busName.setText(busInfo.getBusName());
+        viewHolder.busName.setText(busInfo.getBus());
         viewHolder.fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
         viewHolder.nextStop.setText(busInfo.getNextStop());
         // Return the completed view to render on screen

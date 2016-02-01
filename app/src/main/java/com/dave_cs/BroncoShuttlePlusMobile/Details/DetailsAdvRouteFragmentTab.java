@@ -121,7 +121,8 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                         busInfoList.add(new BusInfo());
                         stopInfoList.add(new StopInfo());
                         listAdapter.notifyDataSetChanged();
-                        Log.i("TEST", listAdapter.getGroupCount() + " " + listAdapter.getChild(1, 0));
+                        Log.i("TEST", "bus: " + listAdapter.getChildrenCount(0) + " vs list: " + busInfoList.size() +
+                                " stops: " + listAdapter.getChildrenCount(1) + " vs list: " + stopInfoList.size());
                     } else {
                         Log.d("<Error>", "" + response.code());
                     }
@@ -130,7 +131,7 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                 @Override
                 public void onFailure(Throwable t) {
                     Log.e("<Error>", t.getLocalizedMessage());
-                    Log.i("TEST", listAdapter.getGroupCount() + " " + listAdapter.getChild(1, 0));
+                    Log.i("TEST", listAdapter.getChildrenCount(1) + " " + ((StopInfo)listAdapter.getChild(1, 0)).getName());
                 }
             });
     }

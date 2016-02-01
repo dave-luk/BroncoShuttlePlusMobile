@@ -133,7 +133,7 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
                 TextView lastUpdate = (TextView) convertView.findViewById(R.id.item_bus_lastUpdate);
                 TextView nextStop = (TextView) convertView.findViewById(R.id.item_bus_nextStop);
 
-                busName.setText(busInfo.getBusName());
+                busName.setText(busInfo.getBus());
                 fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
                 nextStop.setText(busInfo.getNextStop());
                 lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s");
