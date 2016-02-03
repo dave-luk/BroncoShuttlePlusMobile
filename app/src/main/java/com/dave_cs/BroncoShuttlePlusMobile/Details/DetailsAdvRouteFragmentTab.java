@@ -95,9 +95,6 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
         headers = new ArrayList<>();
         headers.add("Shuttle");
         headers.add("Stops");
-
-        busInfoList.add(new BusInfo());
-        stopInfoList.add(new StopInfo());
     }
 
     private void propagate() {
@@ -107,7 +104,7 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
-        RouteInfoService routeInfoService = retrofit.create(RouteInfoService.class);
+        final RouteInfoService routeInfoService = retrofit.create(RouteInfoService.class);
             Call<RouteInfo> call = routeInfoService.getInfo(routeName.replace("ROUTE ",""));
             call.enqueue(new Callback<RouteInfo>() {
 
@@ -116,11 +113,8 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                     if (response.isSuccess()) {
                         Log.d("<Success>","received data");
                         routeInfo = response.body();
-                        busInfoList = routeInfo.getBusOnRoute();
-                        stopInfoList = routeInfo.getStopsOnRoute();
-                        busInfoList.add(new BusInfo());
-                        stopInfoList.add(new StopInfo());
-                        listAdapter.notifyDataSetChanged();
+                        listAdapter.add(routeInfo.getBusOnRoute());
+                        listAdapter.add(routeInfo.getStopsOnRoute());
                         Log.i("TEST", "bus: " + listAdapter.getChildrenCount(0) + " vs list: " + busInfoList.size() +
                                 " stops: " + listAdapter.getChildrenCount(1) + " vs list: " + stopInfoList.size());
                     } else {

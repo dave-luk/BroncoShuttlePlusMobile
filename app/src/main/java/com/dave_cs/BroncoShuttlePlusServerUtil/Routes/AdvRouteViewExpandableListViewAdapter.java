@@ -3,13 +3,11 @@ package com.dave_cs.BroncoShuttlePlusServerUtil.Routes;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Typeface;
-import android.preference.Preference;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -25,9 +23,25 @@ import java.util.List;
 public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAdapter {
 
     private Context context;
+
     private List<String> headers;
     private List<BusInfo> busInfoList;
     private List<StopInfo> stopInfoList;
+
+    public static final class BusViewHolder{
+        LinearLayout mainBox;
+        TextView busName;
+        TextView fullness;
+        TextView lastUpdate;
+        TextView nextStop;
+    }
+
+    public static final class StopViewHolder{
+        LinearLayout mainBox;
+        TextView stopName;
+        TextView nextBus;
+        TextView nextBusTime;
+    }
 
     public AdvRouteViewExpandableListViewAdapter(Context context, List<String> headers, List<BusInfo> busInfos, List<StopInfo> stopInfos)
     {
@@ -35,6 +49,22 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
         this.headers = headers;
         this.busInfoList = busInfos;
         this.stopInfoList = stopInfos;
+    }
+
+    public void add(List list)
+    {
+        if(!list.isEmpty())
+        {
+            if(list.get(0) instanceof BusInfo)
+            {
+                busInfoList.addAll(list);
+            }
+            else if(list.get(0) instanceof StopInfo)
+            {
+                stopInfoList.addAll(list);
+            }
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -121,39 +151,54 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
         switch(groupPosition) {
             case 0:
                 BusInfo busInfo = busInfoList.get(childPosition);
+                BusViewHolder busViewHolder;
 
                 if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.item_bus_item, parent,false);
+                    busViewHolder = new BusViewHolder();
+
+                    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    convertView = inflater.inflate(R.layout.item_bus_item, parent,false);
+                    convertView.setTag(busViewHolder);
+
+                    busViewHolder.mainBox = (LinearLayout) convertView.findViewById(R.id.item_bus_box);
+                    busViewHolder.busName = (TextView) convertView.findViewById(R.id.item_bus_name);
+                    busViewHolder.fullness = (TextView) convertView.findViewById(R.id.item_bus_fullness);
+                    busViewHolder.lastUpdate = (TextView) convertView.findViewById(R.id.item_bus_lastUpdate);
+                    busViewHolder.nextStop = (TextView) convertView.findViewById(R.id.item_bus_nextStop);
                 }
+                else{
+                    busViewHolder = (BusViewHolder) convertView.getTag();
+                }
+                busViewHolder.busName.setText(busInfo.getBus());
+                busViewHolder.fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
+                busViewHolder.nextStop.setText(busInfo.getNextStop());
+                busViewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s");
 
-//                LinearLayout mainBox = (LinearLayout) convertView.findViewById(R.id.item_bus_box);
-                TextView busName = (TextView) convertView.findViewById(R.id.item_bus_name);
-                TextView fullness = (TextView) convertView.findViewById(R.id.item_bus_fullness);
-                TextView lastUpdate = (TextView) convertView.findViewById(R.id.item_bus_lastUpdate);
-                TextView nextStop = (TextView) convertView.findViewById(R.id.item_bus_nextStop);
-
-                busName.setText(busInfo.getBus());
-                fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
-                nextStop.setText(busInfo.getNextStop());
-                lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s");
                 break;
             case 1:
                 StopInfo stopInfo = stopInfoList.get(childPosition);
+                StopViewHolder stopViewHolder;
 
                 if (convertView == null) {
+                    stopViewHolder = new StopViewHolder();
+
                     LayoutInflater inflater = LayoutInflater.from(context);
                     convertView = inflater.inflate(R.layout.item_stop_item, parent, false);
+                    convertView.setTag(stopViewHolder);
+
+                    stopViewHolder.mainBox = (LinearLayout) convertView.findViewById(R.id.item_stop_box);
+                    stopViewHolder.stopName = (TextView) convertView.findViewById(R.id.item_stop_name);
+                    stopViewHolder.nextBus = (TextView) convertView.findViewById(R.id.item_stop_next);
+                   stopViewHolder.nextBusTime = (TextView) convertView.findViewById(R.id.item_stop_next_time);
+                }
+                else{
+                    stopViewHolder = (StopViewHolder) convertView.getTag();
                 }
                 // Populate the data into the template view using the data object
 //                LinearLayout mainBox = (LinearLayout) convertView.findViewById(R.id.item_stop_box);
-                TextView stopName = (TextView) convertView.findViewById(R.id.item_stop_name);
-                TextView nextBus = (TextView) convertView.findViewById(R.id.item_stop_next);
-                TextView nextBusTime = (TextView) convertView.findViewById(R.id.item_stop_next_time);
-
-                stopName.setText(stopInfo.getName());
-                nextBus.setText(stopInfo.getNextBusOfRoute());
-                nextBusTime.setText(Integer.toString(stopInfo.getTimeToNext()));
+                stopViewHolder.stopName.setText(stopInfo.getName());
+                stopViewHolder.nextBus.setText(stopInfo.getNextBusOfRoute());
+                stopViewHolder.nextBusTime.setText(Integer.toString(stopInfo.getTimeToNext()));
                 break;
         }
 
