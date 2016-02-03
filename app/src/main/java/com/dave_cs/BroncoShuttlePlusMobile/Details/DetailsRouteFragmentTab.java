@@ -1,9 +1,11 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +14,13 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
+import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfoAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfoService;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.logging.Handler;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,6 +32,8 @@ import retrofit2.Retrofit;
  * Created by David on 1/20/2016.
  */
 public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
+
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private ArrayList<SimpleRouteInfo> listItems = new ArrayList<>();
     private SimpleRouteInfoAdapter adapter;
@@ -42,6 +48,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
             propagateRoutes();
         else
             listItems.add(new SimpleRouteInfo());
+
     }
 
     @Override
@@ -49,6 +56,17 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.details_route_fragment_layout, container, false);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.routeList_refresh_widget);
+        swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                listItems.clear();
+                propagateRoutes();
+            }
+        });
+
         adapter = new SimpleRouteInfoAdapter(this.getContext(), listItems);
 
         final ListView listView = (ListView) v.findViewById(R.id.routeList);
@@ -76,6 +94,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
     private void propagateRoutes(){
         // reach to server and pull route info
         String[] routes = {"A", "B1", "B2", "C"};
+
         for(String str: routes) {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("http://dave-cs.com")
@@ -93,15 +112,17 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                         Collections.sort(listItems);
                         adapter.notifyDataSetChanged();
                     } else {
-                        Log.e("<Error>","no access to Internet");
+                        Log.e("<Error>",response.code() +":" + response.message());
                     }
                 }
 
                 @Override
                 public void onFailure(Throwable t) {
-                    Log.e("<Error>",t.getLocalizedMessage());
+                    Log.e("<Error>", t.getLocalizedMessage() + "");
                 }
             });
         }
+        if(swipeRefreshLayout != null)
+            swipeRefreshLayout.setRefreshing(false);
     }
 }

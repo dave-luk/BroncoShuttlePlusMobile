@@ -3,7 +3,6 @@ package com.dave_cs.BroncoShuttlePlusServerUtil.Routes;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,8 @@ import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 
 import java.util.List;
+
+import retrofit2.http.Path;
 
 /**
  * Created by David on 1/30/2016.
@@ -49,6 +50,13 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
         this.headers = headers;
         this.busInfoList = busInfos;
         this.stopInfoList = stopInfos;
+    }
+
+    public void removeAll()
+    {
+        busInfoList.clear();
+        stopInfoList.clear();
+        notifyDataSetChanged();
     }
 
     public void add(List list)
@@ -153,7 +161,7 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
                 BusInfo busInfo = busInfoList.get(childPosition);
                 BusViewHolder busViewHolder;
 
-                if (convertView == null) {
+                if (convertView == null || convertView.getTag() instanceof StopViewHolder) {
                     busViewHolder = new BusViewHolder();
 
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -169,7 +177,7 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
                 else{
                     busViewHolder = (BusViewHolder) convertView.getTag();
                 }
-                busViewHolder.busName.setText(busInfo.getBus());
+                busViewHolder.busName.setText(busInfo.getBusName());
                 busViewHolder.fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
                 busViewHolder.nextStop.setText(busInfo.getNextStop());
                 busViewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s");
@@ -179,7 +187,7 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
                 StopInfo stopInfo = stopInfoList.get(childPosition);
                 StopViewHolder stopViewHolder;
 
-                if (convertView == null) {
+                if (convertView == null || convertView.getTag() instanceof BusViewHolder) {
                     stopViewHolder = new StopViewHolder();
 
                     LayoutInflater inflater = LayoutInflater.from(context);

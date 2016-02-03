@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +44,8 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
 
     private List<StopInfo> stopInfoList = new ArrayList<>();
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private AdvRouteViewExpandableListViewAdapter listAdapter;
     private ExpandableListView expandableListView;
     private List<String> headers;
@@ -70,6 +73,16 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.details_adv_route_fragment_layout, container, false);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.adv_routeList_refresh_widget);
+        swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                listAdapter.removeAll();
+                propagate();
+            }
+        });
 
         expandableListView = (ExpandableListView) v.findViewById(R.id.expLV);
         expandableListView.setItemsCanFocus(true);
@@ -128,6 +141,8 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                     Log.i("TEST", listAdapter.getChildrenCount(1) + " " + ((StopInfo)listAdapter.getChild(1, 0)).getName());
                 }
             });
+        if(swipeRefreshLayout != null)
+            swipeRefreshLayout.setRefreshing(false);
     }
 }
 
