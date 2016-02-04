@@ -138,7 +138,6 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                 public void onResponse(Response<RouteInfo> response) {
                     if (response.isSuccess()) {
                         Log.d("<Success>","received data");
-
                         routeInfo = response.body();
                         listAdapter.removeAll();
                         listAdapter.add(routeInfo.getBusOnRoute());
