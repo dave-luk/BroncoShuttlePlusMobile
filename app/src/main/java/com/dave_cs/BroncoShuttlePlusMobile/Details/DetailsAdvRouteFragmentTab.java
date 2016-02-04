@@ -18,6 +18,7 @@ import android.widget.ListView;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfoAdapter;
+import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.AdvRouteViewExpandableListViewAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.RouteInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.RouteInfoService;
@@ -74,6 +75,18 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.details_adv_route_fragment_layout, container, false);
 
+        OnSwipeTouchListener swipeTouchListener = new OnSwipeTouchListener(getActivity()){
+            @Override
+            public void onSwipeLeft() {
+                getFragmentManager()
+                        .beginTransaction()
+                        .replace(android.R.id.tabcontent, new DetailsRouteFragmentTab())
+                        .commit();
+            }
+        };
+
+        ((DetailsViewActivity) getActivity()).registerSwipeListener(swipeTouchListener);
+
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.adv_routeList_refresh_widget);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -125,11 +138,11 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
                 public void onResponse(Response<RouteInfo> response) {
                     if (response.isSuccess()) {
                         Log.d("<Success>","received data");
+
                         routeInfo = response.body();
+                        listAdapter.removeAll();
                         listAdapter.add(routeInfo.getBusOnRoute());
                         listAdapter.add(routeInfo.getStopsOnRoute());
-                        Log.i("TEST", "bus: " + listAdapter.getChildrenCount(0) + " vs list: " + busInfoList.size() +
-                                " stops: " + listAdapter.getChildrenCount(1) + " vs list: " + stopInfoList.size());
                     } else {
                         Log.d("<Error>", "" + response.code());
                     }

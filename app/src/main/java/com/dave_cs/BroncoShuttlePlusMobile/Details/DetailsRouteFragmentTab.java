@@ -35,6 +35,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
+
     private ArrayList<SimpleRouteInfo> listItems = new ArrayList<>();
     private SimpleRouteInfoAdapter adapter;
 
@@ -57,12 +58,13 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
 
         View v = inflater.inflate(R.layout.details_route_fragment_layout, container, false);
 
+
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.routeList_refresh_widget);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                listItems.clear();
+                adapter.clear();
                 propagateRoutes();
             }
         });
@@ -93,6 +95,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
 
     private void propagateRoutes(){
         // reach to server and pull route info
+
         String[] routes = {"A", "B1", "B2", "C"};
 
         for(String str: routes) {
@@ -108,7 +111,18 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                 @Override
                 public void onResponse(Response<SimpleRouteInfo> response) {
                     if (response.isSuccess()) {
-                        listItems.add(response.body());
+                        boolean added = false;
+                        for(SimpleRouteInfo s: listItems)
+                        {
+                            if(s.compareTo(response.body()) == 0)
+                            {
+                                added = true;
+                            }
+
+                        }
+                        if(!added)
+                            listItems.add(response.body());
+
                         Collections.sort(listItems);
                         adapter.notifyDataSetChanged();
                     } else {
