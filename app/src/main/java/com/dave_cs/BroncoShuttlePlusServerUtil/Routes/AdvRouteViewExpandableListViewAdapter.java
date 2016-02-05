@@ -145,7 +145,7 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
             convertView = inflater.inflate(R.layout.list_route_group, null);
         }
 
-        TextView lblListHeader = (TextView) convertView.findViewById(R.id.lblListHeader);
+        TextView lblListHeader = (TextView) convertView.findViewById(R.id.routelblListHeader);
         lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);
 
