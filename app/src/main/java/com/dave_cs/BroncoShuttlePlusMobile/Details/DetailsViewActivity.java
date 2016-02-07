@@ -1,16 +1,14 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
-import android.content.Intent;
-import android.preference.Preference;
+import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
-import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.TabHost;
 import android.widget.Toast;
 
-import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
+import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,18 +58,6 @@ public class DetailsViewActivity extends FragmentActivity {
         mDetailsTabHost.addTab(mDetailsTabHost.newTabSpec("stops").setIndicator("Stops"), DetailsStopFragmentTab.class, null);
         mDetailsTabHost.addTab(mDetailsTabHost.newTabSpec("bus").setIndicator("Shuttles"), DetailsBusFragmentTab.class, null);
 
-        mDetailsTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-            @Override
-            public void onTabChanged(String tabId) {
-                Toast.makeText(DetailsViewActivity.this, "selected tab: " + tabId, Toast.LENGTH_SHORT).show();
-                mDetailsTabHost.getTabContentView().invalidate();
-                switch (tabId)
-                {
-                    case "routes":
-
-                }
-            }
-        });
     }
 
     public void registerSwipeListener(OnSwipeTouchListener listener)

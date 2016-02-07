@@ -9,21 +9,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfoAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.AdvRouteViewExpandableListViewAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.RouteInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.RouteInfoService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfoAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

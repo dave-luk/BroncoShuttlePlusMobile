@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- bg color -->
     <color name="colorPrimary">#888888</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#5F9461</color>
@@ -17,4 +19,6 @@
     <color name="lightGray">#BABABA</color>
     <color name="darkGray">#555555</color>
     <color name="black">#333333</color>
+
+
 </resources>

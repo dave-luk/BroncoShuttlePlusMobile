@@ -9,7 +9,7 @@ import org.json.JSONObject;
  * Created by David on 1/27/2016.
  */
 //@JsonIgnoreProperties(ignoreUnknown = true)
-public class StopInfo {
+public class StopInfo implements Comparable{
 
     private String	name;
     private String	nextBusOfRoute;
@@ -43,4 +43,12 @@ public class StopInfo {
     }
 
     public int getTimeToNext() { return timeToNext; }
+
+    @Override
+    public int compareTo(Object another) {
+        if(another instanceof StopInfo)
+            return this.getName().compareTo(((StopInfo) another).getName());
+        else
+            return this.hashCode() - another.hashCode();
+    }
 }

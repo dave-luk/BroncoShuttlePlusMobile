@@ -1,9 +1,5 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -14,13 +10,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
-import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfoAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfo;
+import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfoAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfoService;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.logging.Handler;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,7 +30,6 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
-
     private ArrayList<SimpleRouteInfo> listItems = new ArrayList<>();
     private SimpleRouteInfoAdapter adapter;
 
@@ -43,6 +37,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
     @SuppressWarnings("Unchecked")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        propagateRoutes();
     }
 
     @Override
@@ -50,8 +45,6 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.details_route_fragment_layout, container, false);
-
-        propagateRoutes();
 
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.routeList_refresh_widget);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
@@ -68,6 +61,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
         final ListView listView = (ListView) v.findViewById(R.id.routeList);
         listView.setAdapter(adapter);
         listView.setItemsCanFocus(true);
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
             @Override
