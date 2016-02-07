@@ -22,6 +22,11 @@ public class StopInfoFastScrollAdapter extends StopInfoAdapter implements Sectio
 
     public StopInfoFastScrollAdapter(Context context, List<StopInfo> stops) {
         super(context, stops);
+        initialize();
+    }
+
+    public void initialize()
+    {
         azIndexer = new HashMap<>();
 
         int size = super.getCount();
@@ -40,7 +45,7 @@ public class StopInfoFastScrollAdapter extends StopInfoAdapter implements Sectio
             String key = it.next();
             keyList.add(key);
         }
-        Collections.sort(keyList);//sort the keylist
+        Collections.sort(keyList);//sort the key list
         sections = new String[keyList.size()]; // simple conversion to array
         keyList.toArray(sections);
     }

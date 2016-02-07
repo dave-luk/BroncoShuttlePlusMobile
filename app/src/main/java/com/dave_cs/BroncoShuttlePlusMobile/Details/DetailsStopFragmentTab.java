@@ -86,6 +86,7 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
                     stopInfoList.addAll(response.body());
                     Collections.sort(stopInfoList);
                     listAdapter.notifyDataSetChanged();
+                    listAdapter.initialize();
                 } else {
                     Log.e("<Error>", response.code() + ":" + response.message());
                 }

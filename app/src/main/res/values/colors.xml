@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- bg color -->
+
     <color name="colorPrimary">#888888</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#5F9461</color>
+    <color name="colorAccentTransparent">#5109af32</color>
+
+    <!-- bg color -->
     <color name="rose">#E35F85</color>
     <color name="red">#ED0043</color>
     <color name="darkRed">#870026</color>
