@@ -78,10 +78,8 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
         OnSwipeTouchListener swipeTouchListener = new OnSwipeTouchListener(getActivity()){
             @Override
             public void onSwipeLeft() {
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(android.R.id.tabcontent, new DetailsRouteFragmentTab())
-                        .commit();
+                if(getFragmentManager() != null)
+                getFragmentManager().popBackStackImmediate();
             }
         };
 

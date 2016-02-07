@@ -48,6 +48,7 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        propagateBuses();
     }
 
     @Override
@@ -84,7 +85,6 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
 //            }
 //        });
         setUpList();
-        propagateBuses();
         listAdapter = new busViewExpandableListViewAdapter(getContext(), headers, listA, listB1, listB2, listC);
         expandableListView.setAdapter(listAdapter);
         for(int i =0; i < listAdapter.getGroupCount(); i++)

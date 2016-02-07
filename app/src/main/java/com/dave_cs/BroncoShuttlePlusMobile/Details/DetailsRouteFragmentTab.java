@@ -79,7 +79,8 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                 newFrag.setArguments(bundle);
                 getFragmentManager()
                         .beginTransaction()
-                        .replace(android.R.id.tabcontent,newFrag,info.getRouteName() + "")
+                        .hide(DetailsRouteFragmentTab.this)
+                        .add(android.R.id.tabcontent, newFrag, info.getRouteName() + "")
                         .addToBackStack("simpleRoute")
                         .commit();
             }
