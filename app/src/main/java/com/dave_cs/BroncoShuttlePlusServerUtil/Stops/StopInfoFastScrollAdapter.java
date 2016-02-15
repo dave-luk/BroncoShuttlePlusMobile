@@ -1,8 +1,6 @@
 package com.dave_cs.BroncoShuttlePlusServerUtil.Stops;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.widget.AlphabetIndexer;
 import android.widget.SectionIndexer;
 
 import java.util.ArrayList;
@@ -64,5 +62,9 @@ public class StopInfoFastScrollAdapter extends StopInfoAdapter implements Sectio
     @Override
     public int getSectionForPosition(int position) {
         return 0;
+    }
+
+    public List<StopInfo> getList() {
+        return super.list;
     }
 }

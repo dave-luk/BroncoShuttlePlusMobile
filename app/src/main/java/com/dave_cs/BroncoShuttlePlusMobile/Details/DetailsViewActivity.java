@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
 import android.view.MotionEvent;
-import android.widget.TabHost;
-import android.widget.Toast;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
@@ -16,6 +14,8 @@ import java.util.List;
 public class DetailsViewActivity extends FragmentActivity {
 
     private FragmentTabHost mDetailsTabHost;
+
+    private boolean supspend;
 
     private List<OnSwipeTouchListener> listenerList;
 
@@ -60,18 +60,26 @@ public class DetailsViewActivity extends FragmentActivity {
 
     }
 
+    public void setSuspend(boolean suspend) {
+        this.supspend = suspend;
+    }
+
     public void registerSwipeListener(OnSwipeTouchListener listener)
     {
         listenerList.add(listener);
     }
 
+    public void unregisterSwipeLister(OnSwipeTouchListener listener) {
+        listenerList.remove(listener);
+    }
+
     @Override
     public boolean dispatchTouchEvent (MotionEvent me)
     {
-        for( OnSwipeTouchListener swipeTouchListener : listenerList)
-        {
-            swipeTouchListener.onTouch(null,me);
-        }
+        if (!supspend)
+            for (OnSwipeTouchListener swipeTouchListener : listenerList) {
+                swipeTouchListener.onTouch(null, me);
+            }
         return super.dispatchTouchEvent(me);
     }
 

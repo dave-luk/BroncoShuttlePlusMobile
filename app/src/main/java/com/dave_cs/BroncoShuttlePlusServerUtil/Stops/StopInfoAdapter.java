@@ -1,18 +1,14 @@
 package com.dave_cs.BroncoShuttlePlusServerUtil.Stops;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AlphabetIndexer;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 
 import java.util.List;
 
@@ -21,16 +17,12 @@ import java.util.List;
  */
 public class StopInfoAdapter extends ArrayAdapter<StopInfo> {
 
-    private static class ViewHolder{
-        LinearLayout mainBox;
-        TextView stopName;
-        TextView nextBus;
-        TextView nextBusTime;
-    }
+    protected List<StopInfo> list;
 
     public StopInfoAdapter(Context context, List<StopInfo> stops)
     {
         super(context, R.layout.item_stop_item, stops);
+        list = stops;
     }
 
     @Override
@@ -54,9 +46,26 @@ public class StopInfoAdapter extends ArrayAdapter<StopInfo> {
         // Populate the data into the template view using the data object
 
         viewHolder.stopName.setText(stopInfo.getName());
-        viewHolder.nextBus.setText(stopInfo.getNextBusOfRoute());
-        viewHolder.nextBusTime.setText(Integer.toString(stopInfo.getTimeToNext()));
+        int timeToNext = stopInfo.getTimeToNext();
+        String nextBus, nextTime;
+        if (timeToNext < 0) {
+            nextBus = "OUT OF SERVICE";
+            nextTime = "";
+        } else {
+            nextBus = stopInfo.getNextBusOfRoute() + " bus in";
+            nextTime = Integer.toString(timeToNext) + " s";
+        }
+
+        viewHolder.nextBus.setText(nextBus);
+        viewHolder.nextBusTime.setText(nextTime);
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    private static class ViewHolder {
+        LinearLayout mainBox;
+        TextView stopName;
+        TextView nextBus;
+        TextView nextBusTime;
     }
 }

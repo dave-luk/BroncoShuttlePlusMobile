@@ -8,9 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvFragmentTab;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfoService;
+import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusListService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.busViewExpandableListViewAdapter;
 
 import java.util.ArrayList;
@@ -62,22 +63,24 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
 
         expandableListView = (ExpandableListView) v.findViewById(R.id.busList);
         expandableListView.setItemsCanFocus(true);
-//        expandableListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                BusInfo info = (BusInfo) listView.getItemAtPosition(position);
-//                android.support.v4.app.Fragment newFrag = new DetailsAdvBusFragmentTab();
-//                Bundle bundle = new Bundle();
-//                bundle.putString("busName", info.getBusName());
-//                newFrag.setArguments(bundle);
-//                getFragmentManager()
-//                        .beginTransaction()
-//                        .replace(android.R.id.tabcontent, newFrag, info.getBusName() + "")
-//                        .addToBackStack("bus")
-//                        .commit();
-//            }
-//        });
+        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
+                Bundle bundle = new Bundle();
+                BusInfo busInfo = (BusInfo) listAdapter.getChild(groupPosition, childPosition);
+                bundle.putString("busName", busInfo.getBusName());
+                bundle.putInt("busNumber", busInfo.getBusNumber());
+                newFrag.setArguments(bundle);
+                getFragmentManager()
+                        .beginTransaction()
+                        .hide(DetailsBusFragmentTab.this)
+                        .add(android.R.id.tabcontent, newFrag, "bus frag")
+                        .addToBackStack("simpleBus")
+                        .commit();
+                return true;
+            }
+        });
         setUpList();
         listAdapter = new busViewExpandableListViewAdapter(getContext(), headers, listA, listB1, listB2, listC);
         expandableListView.setAdapter(listAdapter);
@@ -107,9 +110,9 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
                     .addConverterFactory(JacksonConverterFactory.create())
                     .build();
 
-            BusInfoService busInfoService = retrofit.create(BusInfoService.class);
+            BusListService busListService = retrofit.create(BusListService.class);
 
-            Call<List<BusInfo>> call = busInfoService.getInfo(str);
+            Call<List<BusInfo>> call = busListService.getInfo(str);
             call.enqueue(new Callback<List<BusInfo>>() {
 
                 @Override

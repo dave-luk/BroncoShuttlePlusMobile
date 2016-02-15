@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvRouteFragmentTab;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfoAdapter;
@@ -121,7 +122,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    Log.e("<Error>", t.getLocalizedMessage() + "");
+                    Log.e("<FAIL-ROUTE>", t.getLocalizedMessage() + "");
                 }
             });
         }

@@ -16,8 +16,6 @@ import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 
 import java.util.List;
 
-import retrofit2.http.Path;
-
 /**
  * Created by David on 1/30/2016.
  */
@@ -29,31 +27,14 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
     private List<BusInfo> busInfoList;
     private List<StopInfo> stopInfoList;
 
-    public static final class BusViewHolder{
-        LinearLayout mainBox;
-        TextView busName;
-        TextView fullness;
-        TextView lastUpdate;
-        TextView nextStop;
-    }
-
-    public static final class StopViewHolder{
-        LinearLayout mainBox;
-        TextView stopName;
-        TextView nextBus;
-        TextView nextBusTime;
-    }
-
-    public AdvRouteViewExpandableListViewAdapter(Context context, List<String> headers, List<BusInfo> busInfos, List<StopInfo> stopInfos)
-    {
+    public AdvRouteViewExpandableListViewAdapter(Context context, List<String> headers, List<BusInfo> busInfos, List<StopInfo> stopInfos) {
         this.context = context;
         this.headers = headers;
         this.busInfoList = busInfos;
         this.stopInfoList = stopInfos;
     }
 
-    public void removeAll()
-    {
+    public void removeAll() {
         busInfoList.clear();
         stopInfoList.clear();
         notifyDataSetChanged();
@@ -61,14 +42,10 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
 
     public void add(List list)
     {
-        if(!list.isEmpty())
-        {
-            if(list.get(0) instanceof BusInfo)
-            {
+        if (!list.isEmpty()) {
+            if (list.get(0) instanceof BusInfo) {
                 busInfoList.addAll(list);
-            }
-            else if(list.get(0) instanceof StopInfo)
-            {
+            } else if (list.get(0) instanceof StopInfo) {
                 stopInfoList.addAll(list);
             }
             notifyDataSetChanged();
@@ -92,8 +69,7 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        switch(groupPosition)
-        {
+        switch (groupPosition) {
             case 0:
                 return busInfoList.size();
             case 1:
@@ -152,11 +128,10 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
         return convertView;
     }
 
-
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-        switch(groupPosition) {
+        switch (groupPosition) {
             case 0:
                 BusInfo busInfo = busInfoList.get(childPosition);
                 BusViewHolder busViewHolder;
@@ -165,7 +140,7 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
                     busViewHolder = new BusViewHolder();
 
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    convertView = inflater.inflate(R.layout.item_bus_item, parent,false);
+                    convertView = inflater.inflate(R.layout.item_bus_item, parent, false);
                     convertView.setTag(busViewHolder);
 
                     busViewHolder.mainBox = (LinearLayout) convertView.findViewById(R.id.item_bus_box);
@@ -173,14 +148,21 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
                     busViewHolder.fullness = (TextView) convertView.findViewById(R.id.item_bus_fullness);
                     busViewHolder.lastUpdate = (TextView) convertView.findViewById(R.id.item_bus_lastUpdate);
                     busViewHolder.nextStop = (TextView) convertView.findViewById(R.id.item_bus_nextStop);
-                }
-                else{
+                } else {
                     busViewHolder = (BusViewHolder) convertView.getTag();
                 }
                 busViewHolder.busName.setText(busInfo.getBusName());
-                busViewHolder.fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
-                busViewHolder.nextStop.setText(busInfo.getNextStop());
-                busViewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s");
+                String fullnessStr;
+                int x;
+                if ((x = busInfo.getFullness()) < 77) {
+                    fullnessStr = Integer.toString(x) + "% full. approx. " + (30 - x * (30) / 100) + "/30 seats left";
+                } else {
+                    fullnessStr = Integer.toString(x) + "% full. Full seated.";
+                }
+
+                busViewHolder.fullness.setText(fullnessStr);
+                busViewHolder.nextStop.setText("To : " + busInfo.getNextStop());
+                busViewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s ago");
 
                 break;
             case 1:
@@ -197,16 +179,25 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
                     stopViewHolder.mainBox = (LinearLayout) convertView.findViewById(R.id.item_stop_box);
                     stopViewHolder.stopName = (TextView) convertView.findViewById(R.id.item_stop_name);
                     stopViewHolder.nextBus = (TextView) convertView.findViewById(R.id.item_stop_next);
-                   stopViewHolder.nextBusTime = (TextView) convertView.findViewById(R.id.item_stop_next_time);
-                }
-                else{
+                    stopViewHolder.nextBusTime = (TextView) convertView.findViewById(R.id.item_stop_next_time);
+                } else {
                     stopViewHolder = (StopViewHolder) convertView.getTag();
                 }
                 // Populate the data into the template view using the data object
 //                LinearLayout mainBox = (LinearLayout) convertView.findViewById(R.id.item_stop_box);
                 stopViewHolder.stopName.setText(stopInfo.getName());
-                stopViewHolder.nextBus.setText(stopInfo.getNextBusOfRoute());
-                stopViewHolder.nextBusTime.setText(Integer.toString(stopInfo.getTimeToNext()));
+                int timeToNext = stopInfo.getTimeToNext();
+                String nextBus, nextTime;
+                if (timeToNext < 0) {
+                    nextBus = "OUT OF SERVICE";
+                    nextTime = "";
+                } else {
+                    nextBus = stopInfo.getNextBusOfRoute() + " bus in";
+                    nextTime = Integer.toString(timeToNext) + " s";
+                }
+
+                stopViewHolder.nextBus.setText(nextBus);
+                stopViewHolder.nextBusTime.setText(nextTime);
                 break;
         }
 
@@ -246,5 +237,20 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
     @Override
     public long getCombinedGroupId(long groupId) {
         return 0;
+    }
+
+    public static final class BusViewHolder {
+        LinearLayout mainBox;
+        TextView busName;
+        TextView fullness;
+        TextView lastUpdate;
+        TextView nextStop;
+    }
+
+    public static final class StopViewHolder {
+        LinearLayout mainBox;
+        TextView stopName;
+        TextView nextBus;
+        TextView nextBusTime;
     }
 }

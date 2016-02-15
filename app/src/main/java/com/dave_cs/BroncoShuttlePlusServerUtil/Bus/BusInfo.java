@@ -3,16 +3,15 @@ package com.dave_cs.BroncoShuttlePlusServerUtil.Bus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by David on 1/27/2016.
- */
 
 public class BusInfo implements Comparable
 {
     private String busName;
+    private String route;
     private int fullness;
     private int lastUpdate;
     private String nextStop;
+    private int busNumber;
 
     public BusInfo(JSONObject obj)
     {
@@ -20,8 +19,10 @@ public class BusInfo implements Comparable
         {
             this.busName = obj.getString("busName");
             this.fullness = obj.getInt("fullness");
+            this.route = obj.getString("route");
             this.lastUpdate = obj.getInt("lastUpdate");
             this.nextStop = obj.getString("nextStop");
+            this.busNumber = obj.getInt("busNumber");
         }
         catch(JSONException e)
         {
@@ -32,9 +33,11 @@ public class BusInfo implements Comparable
     public BusInfo()
     {
         this.busName = "Unavailable!";
+        this.route = "";
         this.fullness = 0;
         this.lastUpdate = 0;
         this.nextStop = "";
+        this.busNumber = 0;
     }
 
 
@@ -52,6 +55,14 @@ public class BusInfo implements Comparable
 
     public int getLastUpdate() {
         return lastUpdate;
+    }
+
+    public int getBusNumber() {
+        return busNumber;
+    }
+
+    public String getRoute() {
+        return route;
     }
 
     @Override

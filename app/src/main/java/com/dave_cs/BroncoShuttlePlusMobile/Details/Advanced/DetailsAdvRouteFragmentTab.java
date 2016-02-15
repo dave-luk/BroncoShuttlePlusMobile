@@ -1,9 +1,10 @@
-package com.dave_cs.BroncoShuttlePlusMobile.Details;
+package com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Details.DetailsViewActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
@@ -31,7 +33,7 @@ import retrofit2.Retrofit;
 /**
  * Created by David on 1/25/2016.
  */
-public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment {
+public class DetailsAdvRouteFragmentTab extends Fragment {
 
     private RouteInfo routeInfo;
 
@@ -74,6 +76,7 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
             public void onSwipeLeft() {
                 if(getFragmentManager() != null)
                 getFragmentManager().popBackStackImmediate();
+                ((DetailsViewActivity) getActivity()).unregisterSwipeLister(this);
             }
         };
 
@@ -94,8 +97,36 @@ public class DetailsAdvRouteFragmentTab extends android.support.v4.app.Fragment 
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+
+                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
+                Bundle bundle = new Bundle();
+
+                switch (groupPosition) {
+                    case 0:
+                        BusInfo busInfo = (BusInfo) listAdapter.getChild(groupPosition, childPosition);
+                        bundle.putString("busName", busInfo.getBusName());
+                        bundle.putInt("busNumber", busInfo.getBusNumber());
+                        newFrag.setArguments(bundle);
+                        getFragmentManager()
+                                .beginTransaction()
+                                .hide(DetailsAdvRouteFragmentTab.this)
+                                .add(android.R.id.tabcontent, newFrag, "bus frag")
+                                .addToBackStack("advRoute")
+                                .commit();
+                        break;
+                    case 1:
+                        StopInfo stopInfo = (StopInfo) listAdapter.getChild(groupPosition, childPosition);
+                        bundle.putString("stopName", stopInfo.getName());
+                        bundle.putInt("stopNumber", stopInfo.getStopNumber());
+                        newFrag.setArguments(bundle);
+                        getFragmentManager()
+                                .beginTransaction()
+                                .hide(DetailsAdvRouteFragmentTab.this)
+                                .add(android.R.id.tabcontent, newFrag, "stop frag")
+                                .addToBackStack("advRoute")
+                                .commit();
+                }
                 return true;
-                //work here
             }
         });
         setUpList();

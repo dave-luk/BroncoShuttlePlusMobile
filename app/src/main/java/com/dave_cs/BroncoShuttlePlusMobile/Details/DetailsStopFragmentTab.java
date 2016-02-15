@@ -6,13 +6,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvFragmentTab;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfoAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfoFastScrollAdapter;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfoService;
+import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopListService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,28 +66,48 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
         stopListView.setItemsCanFocus(true);
         stopListView.setAdapter(listAdapter);
 
+        stopListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
+                Bundle bundle = new Bundle();
+                bundle.putString("stopName", stopInfoList.get(position).getName());
+                bundle.putInt("stopNumber", stopInfoList.get(position).getStopNumber());
+                newFrag.setArguments(bundle);
+                getFragmentManager()
+                        .beginTransaction()
+                        .hide(DetailsStopFragmentTab.this)
+                        .add(android.R.id.tabcontent, newFrag, "stop frag")
+                        .addToBackStack("simpleStop")
+                        .commit();
+            }
+        });
+
         return v;
     }
 
     private void propagate()
     {
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://dave-cs.com")
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
-        StopInfoService stopInfoService = retrofit.create(StopInfoService.class);
+        StopListService stopListService = retrofit.create(StopListService.class);
 
-        Call<List<StopInfo>> call = stopInfoService.getInfo();
+        Call<List<StopInfo>> call = stopListService.getInfo();
         call.enqueue(new Callback<List<StopInfo>>() {
 
             @Override
             public void onResponse(Response<List<StopInfo>> response) {
+                Log.d("<data>", "size:" + stopInfoList.size());
                 if (response.isSuccess()) {
-                    stopInfoList.addAll(response.body());
-                    Collections.sort(stopInfoList);
+                    listAdapter.addAll(response.body());
+                    Collections.sort(listAdapter.getList());
                     listAdapter.notifyDataSetChanged();
                     listAdapter.initialize();
+                    Log.d("<data>", "size:" + stopInfoList.size());
                 } else {
                     Log.e("<Error>", response.code() + ":" + response.message());
                 }
@@ -94,7 +115,7 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
 
             @Override
             public void onFailure(Throwable t) {
-                Log.e("<Error>", t.getLocalizedMessage() + "");
+                Log.e("<FAIL>", t.getLocalizedMessage() + " ");
             }
         });
 

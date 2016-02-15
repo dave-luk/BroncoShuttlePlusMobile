@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfo;
 
 import java.util.ArrayList;
 
@@ -18,14 +17,6 @@ import java.util.ArrayList;
  * Created by David on 1/21/2016.
  */
 public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
-    // View lookup cache
-    private static class ViewHolder {
-        LinearLayout mainBox;
-        TextView routeName;
-        TextView routeHours;
-        TextView busCount;
-    }
-
     public SimpleRouteInfoAdapter(Context context, ArrayList<SimpleRouteInfo> users) {
         super(context, R.layout.item_route_item, users);
     }
@@ -55,7 +46,7 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
 
         viewHolder.routeName.setText(simpleRouteInfo.getRouteName());
         viewHolder.routeHours.setText(simpleRouteInfo.getRouteHours());
-        if(simpleRouteInfo.getRouteHours().equals("OUT OF SERVICE")){
+        if (simpleRouteInfo.getRouteHours().equals("OUT OF SERVICE") || !simpleRouteInfo.isInService()) {
             viewHolder.busCount.setText("");
         }
         else{
@@ -63,5 +54,13 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
         }
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    // View lookup cache
+    private static class ViewHolder {
+        LinearLayout mainBox;
+        TextView routeName;
+        TextView routeHours;
+        TextView busCount;
     }
 }

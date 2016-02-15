@@ -26,14 +26,6 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
     private List<BusInfo> listB2;
     private List<BusInfo> listC;
 
-    public static final class BusViewHolder{
-        LinearLayout mainBox;
-        TextView busName;
-        TextView fullness;
-        TextView lastUpdate;
-        TextView nextStop;
-    }
-
     public busViewExpandableListViewAdapter(Context ctx, List<String> headers, List<BusInfo> A, List<BusInfo> B1,List<BusInfo> B2,List<BusInfo> C)
     {
         this.context = ctx;
@@ -174,9 +166,19 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
         }
 
         busViewHolder.busName.setText(busInfo.getBusName());
-        busViewHolder.fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
-        busViewHolder.nextStop.setText(busInfo.getNextStop());
-        busViewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s");
+        String fullnessStr;
+        int x;
+        if ((x = busInfo.getFullness()) < 77) {
+            fullnessStr = Integer.toString(x) + "% full. approx. " + (30 - x * (30) / 100) + "/30 seats left";
+        } else {
+            fullnessStr = Integer.toString(x) + "% full. Full seated.";
+        }
+
+        busViewHolder.fullness.setText(fullnessStr);
+        busViewHolder.nextStop.setText("To : " + busInfo.getNextStop());
+        busViewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s ago");
+        busViewHolder.nextStop.setText("To : " + busInfo.getNextStop());
+        busViewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s ago");
 
         return convertView;
     }
@@ -184,5 +186,13 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
+    }
+
+    public static final class BusViewHolder {
+        LinearLayout mainBox;
+        TextView busName;
+        TextView fullness;
+        TextView lastUpdate;
+        TextView nextStop;
     }
 }

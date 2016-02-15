@@ -1,6 +1,6 @@
 package com.dave_cs.BroncoShuttlePlusServerUtil.Stops;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import android.support.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,12 +13,16 @@ public class StopInfo implements Comparable{
 
     private String	name;
     private String	nextBusOfRoute;
+    private String onRoute;
     private int		timeToNext;
+    private int stopNumber;
 
     public StopInfo() {
         name = "testing!";
         nextBusOfRoute = "";
+        onRoute = "";
         timeToNext = 0;
+        stopNumber = 0;
     }
 
     public StopInfo(JSONObject object)
@@ -26,9 +30,10 @@ public class StopInfo implements Comparable{
         try {
             name = object.getString("name");
             nextBusOfRoute = object.getString("nextBusOfRoute");
+            onRoute = object.getString("onRoute");
             timeToNext = object.getInt("timeToNext");
-        }
-        catch (JSONException e)
+            stopNumber = object.getInt("stopNumber");
+        } catch (JSONException ignored)
         {
 
         }
@@ -44,11 +49,21 @@ public class StopInfo implements Comparable{
 
     public int getTimeToNext() { return timeToNext; }
 
+    public int getStopNumber() {
+        return stopNumber;
+    }
+
+    public String getOnRoute() {
+        return onRoute;
+    }
+
     @Override
-    public int compareTo(Object another) {
+    public int compareTo(@NonNull Object another) {
         if(another instanceof StopInfo)
             return this.getName().compareTo(((StopInfo) another).getName());
         else
             return this.hashCode() - another.hashCode();
     }
+
+
 }

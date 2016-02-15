@@ -17,14 +17,6 @@ import java.util.List;
  */
 public class BusInfoAdapter extends ArrayAdapter<BusInfo>{
 
-    private static class ViewHolder{
-        LinearLayout mainBox;
-        TextView busName;
-        TextView fullness;
-        TextView lastUpdate;
-        TextView nextStop;
-    }
-
     public BusInfoAdapter(Context context, List<BusInfo> bus) {
         super(context, R.layout.item_bus_item, bus);
     }
@@ -52,8 +44,17 @@ public class BusInfoAdapter extends ArrayAdapter<BusInfo>{
 
         viewHolder.busName.setText(busInfo.getBusName());
         viewHolder.fullness.setText(Integer.toString(busInfo.getFullness()) + "%");
-        viewHolder.nextStop.setText(busInfo.getNextStop());
+        viewHolder.nextStop.setText("Heading " + busInfo.getNextStop());
+        viewHolder.lastUpdate.setText(Integer.toString(busInfo.getLastUpdate()) + " s ago");
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    static class ViewHolder {
+        LinearLayout mainBox;
+        TextView busName;
+        TextView fullness;
+        TextView lastUpdate;
+        TextView nextStop;
     }
 }

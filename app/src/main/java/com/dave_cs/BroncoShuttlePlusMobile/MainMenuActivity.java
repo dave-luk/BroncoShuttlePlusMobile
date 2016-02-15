@@ -3,13 +3,13 @@ package com.dave_cs.BroncoShuttlePlusMobile;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.dave_cs.BroncoShuttlePlusMobile.Details.DetailsViewActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.Options.OptionsActivity;
@@ -33,6 +33,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.e("debug", "liveMap Pressed!");
+                Toast.makeText(MainMenuActivity.this, getResources().getText(R.string.menu_wip), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -49,6 +50,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.e("debug", "navigation Pressed!");
+                Toast.makeText(MainMenuActivity.this, getResources().getText(R.string.menu_wip), Toast.LENGTH_SHORT).show();
             }
         });
 
