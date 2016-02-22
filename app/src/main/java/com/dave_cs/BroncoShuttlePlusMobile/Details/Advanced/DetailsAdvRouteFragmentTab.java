@@ -168,6 +168,8 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
                     } else {
                         Log.d("<Error>", "" + response.code());
                     }
+                    if (swipeRefreshLayout != null)
+                        swipeRefreshLayout.setRefreshing(false);
                 }
 
                 @Override
@@ -176,8 +178,6 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
                     Log.i("TEST", listAdapter.getChildrenCount(1) + " " + ((StopInfo)listAdapter.getChild(1, 0)).getName());
                 }
             });
-        if(swipeRefreshLayout != null)
-            swipeRefreshLayout.setRefreshing(false);
     }
 }
 

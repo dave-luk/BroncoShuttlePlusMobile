@@ -111,6 +111,8 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
                 } else {
                     Log.e("<Error>", response.code() + ":" + response.message());
                 }
+                if (swipeRefreshLayout != null)
+                    swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -118,9 +120,6 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
                 Log.e("<FAIL>", t.getLocalizedMessage() + " ");
             }
         });
-
-        if (swipeRefreshLayout != null)
-            swipeRefreshLayout.setRefreshing(false);
     }
 
 

@@ -141,6 +141,8 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
                     } else {
                         Log.e("<Error>", response.code() + ":" + response.message());
                     }
+                    if (swipeRefreshLayout != null)
+                        swipeRefreshLayout.setRefreshing(false);
                 }
 
                 @Override
@@ -148,9 +150,6 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
                     Log.e("<Error>", t.getLocalizedMessage() + "");
                 }
             });
-
-            if (swipeRefreshLayout != null)
-                swipeRefreshLayout.setRefreshing(false);
         }
     }
 }

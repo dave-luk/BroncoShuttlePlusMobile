@@ -118,6 +118,8 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                     } else {
                         Log.e("<Error>",response.code() +":" + response.message());
                     }
+                    if (swipeRefreshLayout != null)
+                        swipeRefreshLayout.setRefreshing(false);
                 }
 
                 @Override
@@ -126,7 +128,5 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                 }
             });
         }
-        if(swipeRefreshLayout != null)
-            swipeRefreshLayout.setRefreshing(false);
     }
 }

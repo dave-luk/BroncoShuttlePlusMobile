@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,6 +54,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
 
     private FrameLayout detailsInfo;
     private LinearLayout linearLayout;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayout innerLayout;
 
     private Object info;
@@ -105,6 +107,15 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
         refocus = (ImageButton) v.findViewById(R.id.refocus_icon);
         detailsInfo = (FrameLayout) v.findViewById(R.id.details_frag_holder);
 
+        swipeRefreshLayout = new SwipeRefreshLayout(getContext());
+        swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getInfo();
+            }
+        });
+
         if (detailsInfo != null) {
             linearLayout = new LinearLayout(getContext());
             linearLayout.setBackgroundColor(Color.WHITE);
@@ -114,31 +125,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
             linearLayout.setWeightSum(100f);
             linearLayout.setLayoutParams(linearLayoutParams);
 
-            TextView title = new TextView(getContext());
-            title.setText(name);
-            title.setTextColor(Color.WHITE);
-            title.setBackgroundColor(Color.BLACK);
-            title.setSingleLine(true);
-            title.setEllipsize(TextUtils.TruncateAt.END);
-            title.setTextSize(24);
-
-            LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
-            titleParams.weight = 30f;
-            title.setLayoutParams(titleParams);
-
-            innerLayout = new LinearLayout(getContext());
-            innerLayout.setOrientation(LinearLayout.VERTICAL);
-            LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
-            frameParams.weight = 70f;
-            innerLayout.setLayoutParams(frameParams);
-
-            linearLayout.addView(title);
-
             initInfo();
-
-            //finalize and add the layouts according to hierarchy
-            linearLayout.addView(innerLayout);
-            detailsInfo.addView(linearLayout);
         }
 
         refocus.setOnClickListener(new View.OnClickListener() {
@@ -172,7 +159,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
         Log.d("<Maps>", "map ready");
         this.googleMap = googleMap;
 
-        Log.d("<Maps>", "got a location. displaying");
+        Log.d("<Maps>", "got a location. displaying" + location.toString());
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -184,13 +171,10 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
             return;
         }
         googleMap.setMyLocationEnabled(true);
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16.5f));
-        currMarker = googleMap.addMarker(new MarkerOptions().position(location).title(name).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon)));
+        initMarker();
 
         getChildFragmentManager().beginTransaction().replace(R.id.map_frag, mapFragment).commit();
 
-        currMarker.showInfoWindow();
-        googleMap.setBuildingsEnabled(true);
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -224,6 +208,25 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
     }
 
     private void initInfo() {
+
+        TextView title = new TextView(getContext());
+        title.setText(name);
+        title.setTextColor(Color.WHITE);
+        title.setBackgroundColor(Color.BLACK);
+        title.setSingleLine(true);
+        title.setEllipsize(TextUtils.TruncateAt.END);
+        title.setTextSize(24);
+
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
+        titleParams.weight = 30f;
+        title.setLayoutParams(titleParams);
+
+        innerLayout = new LinearLayout(getContext());
+        innerLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
+        frameParams.weight = 70f;
+        innerLayout.setLayoutParams(frameParams);
+
         if (info != null) {
             switch (type) {
                 case "stop":
@@ -264,6 +267,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     LinearLayout.LayoutParams nextBusTimeParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     nextBusTime.setLayoutParams(nextBusTimeParams);
 
+                    clearView();
                     innerLayout.addView(routes);
                     innerLayout.addView(nextBus);
                     innerLayout.addView(nextBusTime);
@@ -304,12 +308,29 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     LinearLayout.LayoutParams nextStopParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     nextStop.setLayoutParams(nextStopParams);
 
+                    clearView();
                     innerLayout.addView(busRoute);
                     innerLayout.addView(fullness);
                     innerLayout.addView(nextStop);
                     break;
             }
+
+            linearLayout.addView(title);
+
+            linearLayout.addView(innerLayout);
+
         }
+        if (swipeRefreshLayout != null)
+            swipeRefreshLayout.setRefreshing(false);
+        swipeRefreshLayout.addView(linearLayout);
+        detailsInfo.addView(swipeRefreshLayout);
+    }
+
+    private void clearView() {
+        innerLayout.removeAllViews();
+        linearLayout.removeAllViews();
+        swipeRefreshLayout.removeView(linearLayout);
+        detailsInfo.removeAllViews();
     }
 
     private void getInfo() {
@@ -382,6 +403,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                             Location l = response.body();
                             location = new LatLng(l.getLat(), l.getLng());
                             Log.d("<Location>", "location is:" + location);
+                            initMarker();
                         } else {
                             Log.e("<Error>", response.code() + ":" + response.message());
                         }
@@ -403,6 +425,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                         if (response.isSuccess()) {
                             Location l = response.body();
                             location = new LatLng(l.getLat(), l.getLng());
+                            initMarker();
                         } else {
                             Log.e("<Error>", response.code() + ":" + response.message());
                         }
@@ -416,4 +439,25 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 break;
         }
     }
+
+    private void initMarker() {
+        if (googleMap != null) {
+            Log.d("<Marker>", "Updated marker to: " + location);
+            googleMap.clear();
+            currMarker = googleMap.addMarker(new MarkerOptions().position(location).title(name).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon)));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16.5f), new GoogleMap.CancelableCallback() {
+                @Override
+                public void onFinish() {
+                    currMarker.showInfoWindow();
+                }
+
+                @Override
+                public void onCancel() {
+                }
+            });
+
+        }
+    }
 }
+
+
