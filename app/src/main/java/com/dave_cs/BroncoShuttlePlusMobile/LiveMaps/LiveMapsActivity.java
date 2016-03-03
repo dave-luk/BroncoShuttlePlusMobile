@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
+import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusListService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Location;
 import com.dave_cs.BroncoShuttlePlusServerUtil.LocationService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
@@ -63,6 +66,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             B1Bus = new ArrayList<>(),
             B2Bus = new ArrayList<>(),
             CBus = new ArrayList<>();
+    private List<Marker> BusMarkers = new ArrayList<>();
     private LatLngBounds.Builder boundsBuilder;
     private LatLngBounds.Builder stopBoundsBuilder = new LatLngBounds.Builder();
     private LatLngBounds bounds;
@@ -81,6 +85,13 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
     private LinearLayout linearLayout;
     private LinearLayout innerLayout;
 
+    private Handler uiCallback = new Handler() {
+        public void handleMessage(Message msg) {
+            if (hasPoly != -1)
+                updateBusLocation(routeList[hasPoly]);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,9 +102,10 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         mapFragment.getMapAsync(this);
 
 
-        for (int r : routeList) {
-            getPolyLine(r);
-            getRouteInfo(r);
+        for (int i = 0; i < routeList.length; i++) {
+            getPolyLine(routeList[i]);
+            getRouteInfo(routeList[i]);
+            getBusInfo(routeTitle[i].replace("Route ", ""));
         }
 
         drawerLayout = (DrawerLayout) findViewById(R.id.liveMap_drawer_layout);
@@ -214,6 +226,53 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         });
     }
 
+    private void getBusInfo(final String str) {
+        // reach to server and pull route info
+
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://dave-cs.com")
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+
+        BusListService busListService = retrofit.create(BusListService.class);
+
+        Call<List<BusInfo>> call = busListService.getInfo(str);
+        call.enqueue(new Callback<List<BusInfo>>() {
+
+            @Override
+            public void onResponse(Call<List<BusInfo>> call, Response<List<BusInfo>> response) {
+                if (response.isSuccess()) {
+                    switch (str) {
+                        case "A":
+                            ABus.clear();
+                            ABus.addAll(response.body());
+                            break;
+                        case "B1":
+                            B1Bus.clear();
+                            B1Bus.addAll(response.body());
+                            break;
+                        case "B2":
+                            B2Bus.clear();
+                            B2Bus.addAll(response.body());
+                            break;
+                        case "C":
+                            CBus.clear();
+                            CBus.addAll(response.body());
+                            break;
+                    }
+                } else {
+                    Log.e("<Error>", response.code() + ":" + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<BusInfo>> call, Throwable t) {
+                Log.e("<Error>", t.getLocalizedMessage() + "");
+            }
+        });
+    }
+
     private void getLocation(final String type, final Object info, final int route, final int index) {
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -288,7 +347,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             if (o instanceof StopInfo) {
                 mMap.addMarker(new MarkerOptions().position(location).title(((StopInfo) o).getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_stop_icon)).snippet(type + " " + route + " " + index));
             } else if (o instanceof BusInfo) {
-                mMap.addMarker(new MarkerOptions().position(location).title(((BusInfo) o).getBusName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon)));
+                BusMarkers.add(mMap.addMarker(new MarkerOptions().position(location).title(((BusInfo) o).getBusName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon))));
             }
 
 
@@ -362,6 +421,23 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
                     }
                     break;
             }
+            updateBusLocation(route);
+
+            Thread timer = new Thread() {
+                public void run() {
+                    for (; ; ) {
+                        // do stuff in a separate thread
+                        uiCallback.sendEmptyMessage(0);
+                        try {
+                            Thread.sleep(3000);    // sleep for 3 seconds
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
+            timer.start();
+
             Log.d("<PolyLine>", "elements: " + A.size() + " | " + B1.size() + " | " + B2.size() + " | " + C.size());
             if (stopBoundsCounter > 0) {
                 stopBounds = stopBoundsBuilder.build();
@@ -373,6 +449,36 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         } else {
             hasPoly = -1;
 
+        }
+    }
+
+    private void updateBusLocation(int route) {
+        for (Marker m : BusMarkers)
+            m.remove();
+        BusMarkers.clear();
+        switch (route) {
+            case 3164:
+                for (int i = 0; i < ABus.size(); i++) {
+                    getLocation("bus", ABus.get(i), route, i);
+                }
+                break;
+            case 3166:
+
+                for (int i = 0; i < B1Bus.size(); i++) {
+                    getLocation("bus", B1Bus.get(i), route, i);
+                }
+                break;
+            case 3167:
+
+                for (int i = 0; i < B2Bus.size(); i++) {
+                    getLocation("bus", B2Bus.get(i), route, i);
+                }
+                break;
+            case 3162:
+                for (int i = 0; i < CBus.size(); i++) {
+                    getLocation("bus", CBus.get(i), route, i);
+                }
+                break;
         }
     }
 
@@ -590,6 +696,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.056781, -117.821071), 14.5f));
         mMap.setMyLocationEnabled(true);
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
