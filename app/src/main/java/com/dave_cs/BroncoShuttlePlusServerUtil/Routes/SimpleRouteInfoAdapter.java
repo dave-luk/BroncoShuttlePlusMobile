@@ -40,7 +40,7 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         // Populate the data into the template view using the data object\
-        int bg = (simpleRouteInfo.isInService()) ? Color.parseColor("#CC00FF00") : Color.parseColor("#CCFF0000");
+        int bg = (simpleRouteInfo.isInService()) ? Color.parseColor("#7724AB84") : Color.parseColor("#77851010");
 
         viewHolder.mainBox.setBackgroundColor(bg);
 

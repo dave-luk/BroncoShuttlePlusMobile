@@ -15,7 +15,7 @@ public class DetailsViewActivity extends FragmentActivity {
 
     private FragmentTabHost mDetailsTabHost;
 
-    private boolean supspend;
+    private boolean suspend;
 
     private List<OnSwipeTouchListener> listenerList;
 
@@ -61,7 +61,7 @@ public class DetailsViewActivity extends FragmentActivity {
     }
 
     public void setSuspend(boolean suspend) {
-        this.supspend = suspend;
+        this.suspend = suspend;
     }
 
     public void registerSwipeListener(OnSwipeTouchListener listener)
@@ -76,7 +76,7 @@ public class DetailsViewActivity extends FragmentActivity {
     @Override
     public boolean dispatchTouchEvent (MotionEvent me)
     {
-        if (!supspend)
+        if (!suspend)
             for (OnSwipeTouchListener swipeTouchListener : listenerList) {
                 swipeTouchListener.onTouch(null, me);
             }

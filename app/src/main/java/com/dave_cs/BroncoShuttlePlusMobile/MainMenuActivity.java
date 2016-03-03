@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.dave_cs.BroncoShuttlePlusMobile.Details.DetailsViewActivity;
+import com.dave_cs.BroncoShuttlePlusMobile.LiveMaps.LiveMapsActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.Options.OptionsActivity;
 
 
@@ -33,7 +34,8 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.e("debug", "liveMap Pressed!");
-                Toast.makeText(MainMenuActivity.this, getResources().getText(R.string.menu_wip), Toast.LENGTH_SHORT).show();
+                currObj = new Intent(MainMenuActivity.this, LiveMapsActivity.class);
+                startActivity(currObj);
             }
         });
 

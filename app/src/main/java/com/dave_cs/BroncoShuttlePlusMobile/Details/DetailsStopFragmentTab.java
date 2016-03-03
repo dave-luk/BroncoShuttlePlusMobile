@@ -21,9 +21,9 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.JacksonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by David on 1/20/2016.
@@ -100,7 +100,7 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
         call.enqueue(new Callback<List<StopInfo>>() {
 
             @Override
-            public void onResponse(Response<List<StopInfo>> response) {
+            public void onResponse(Call<List<StopInfo>> call, Response<List<StopInfo>> response) {
                 Log.d("<data>", "size:" + stopInfoList.size());
                 if (response.isSuccess()) {
                     listAdapter.addAll(response.body());
@@ -116,7 +116,7 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<List<StopInfo>> call, Throwable t) {
                 Log.e("<FAIL>", t.getLocalizedMessage() + " ");
             }
         });

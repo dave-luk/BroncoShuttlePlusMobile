@@ -5,7 +5,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface LocationService {
-    @GET("/BroncoShuttlePlus/details/latLng")
+    @GET("/BroncoShuttlePlus/latLng")
     Call<Location> getLocation(@Query("stopNumber") Integer stopNumber,
                                @Query("busNumber") Integer busNumber);
 }

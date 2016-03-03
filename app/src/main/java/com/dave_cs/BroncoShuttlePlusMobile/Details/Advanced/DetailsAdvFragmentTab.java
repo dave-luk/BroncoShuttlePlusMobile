@@ -35,11 +35,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.JacksonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by David on 2/7/2016.
@@ -335,9 +337,16 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
 
     private void getInfo() {
 
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://dave-cs.com")
                 .addConverterFactory(JacksonConverterFactory.create())
+                .client(client)
                 .build();
 
         switch (type) {
@@ -347,7 +356,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 Call<StopInfo> stopCall = stopInfoService.getInfo(Integer.toString(id));
                 stopCall.enqueue(new Callback<StopInfo>() {
                     @Override
-                    public void onResponse(Response<StopInfo> response) {
+                    public void onResponse(Call<StopInfo> call, Response<StopInfo> response) {
                         if (response.isSuccess()) {
                             info = response.body();
                             initInfo();
@@ -355,9 +364,10 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     }
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "");
+                    public void onFailure(Call<StopInfo> call, Throwable t) {
+                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
                     }
+
                 });
                 break;
             case "bus":
@@ -366,7 +376,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 Call<BusInfo> busCall = busInfoService.getInfo(Integer.toString(id));
                 busCall.enqueue(new Callback<BusInfo>() {
                     @Override
-                    public void onResponse(Response<BusInfo> response) {
+                    public void onResponse(Call<BusInfo> call, Response<BusInfo> response) {
                         if (response.isSuccess()) {
                             info = response.body();
                             initInfo();
@@ -374,8 +384,8 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     }
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "");
+                    public void onFailure(Call<BusInfo> call, Throwable t) {
+                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
                     }
                 });
                 break;
@@ -384,9 +394,16 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
 
     private void getLocation() {
 
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://dave-cs.com")
                 .addConverterFactory(JacksonConverterFactory.create())
+                .client(client)
                 .build();
 
         LocationService locationService = retrofit.create(LocationService.class);
@@ -398,7 +415,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 stopCall.enqueue(new Callback<Location>() {
 
                     @Override
-                    public void onResponse(Response<Location> response) {
+                    public void onResponse(Call<Location> call, Response<Location> response) {
                         if (response.isSuccess()) {
                             Location l = response.body();
                             location = new LatLng(l.getLat(), l.getLng());
@@ -410,8 +427,8 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     }
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "");
+                    public void onFailure(Call<Location> call, Throwable t) {
+                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
                     }
                 });
                 break;
@@ -421,10 +438,11 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 busCall.enqueue(new Callback<Location>() {
 
                     @Override
-                    public void onResponse(Response<Location> response) {
+                    public void onResponse(Call<Location> call, Response<Location> response) {
                         if (response.isSuccess()) {
                             Location l = response.body();
                             location = new LatLng(l.getLat(), l.getLng());
+                            Log.d("<Location>", "location of bus is:" + l.getLat() + " | " + location);
                             initMarker();
                         } else {
                             Log.e("<Error>", response.code() + ":" + response.message());
@@ -432,8 +450,8 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     }
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "");
+                    public void onFailure(Call<Location> call, Throwable t) {
+                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
                     }
                 });
                 break;

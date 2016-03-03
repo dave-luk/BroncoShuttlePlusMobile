@@ -26,9 +26,9 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.JacksonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by David on 1/25/2016.
@@ -153,12 +153,12 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
-        final RouteInfoService routeInfoService = retrofit.create(RouteInfoService.class);
+        RouteInfoService routeInfoService = retrofit.create(RouteInfoService.class);
             Call<RouteInfo> call = routeInfoService.getInfo(routeName.replace("ROUTE ",""));
             call.enqueue(new Callback<RouteInfo>() {
 
                 @Override
-                public void onResponse(Response<RouteInfo> response) {
+                public void onResponse(Call<RouteInfo> call, Response<RouteInfo> response) {
                     if (response.isSuccess()) {
                         Log.d("<Success>","received data");
                         routeInfo = response.body();
@@ -173,7 +173,7 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
                 }
 
                 @Override
-                public void onFailure(Throwable t) {
+                public void onFailure(Call<RouteInfo> call, Throwable t) {
                     Log.e("<Error>", t.getLocalizedMessage());
                     Log.i("TEST", listAdapter.getChildrenCount(1) + " " + ((StopInfo)listAdapter.getChild(1, 0)).getName());
                 }

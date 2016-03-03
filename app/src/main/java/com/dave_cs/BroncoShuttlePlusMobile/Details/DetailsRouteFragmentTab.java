@@ -20,9 +20,9 @@ import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.JacksonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by David on 1/20/2016.
@@ -99,7 +99,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
             call.enqueue(new Callback<SimpleRouteInfo>() {
 
                 @Override
-                public void onResponse(Response<SimpleRouteInfo> response) {
+                public void onResponse(Call<SimpleRouteInfo> call, Response<SimpleRouteInfo> response) {
                     if (response.isSuccess()) {
                         boolean added = false;
                         for(SimpleRouteInfo s: listItems)
@@ -123,7 +123,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                 }
 
                 @Override
-                public void onFailure(Throwable t) {
+                public void onFailure(Call<SimpleRouteInfo> call, Throwable t) {
                     Log.e("<FAIL-ROUTE>", t.getLocalizedMessage() + "");
                 }
             });

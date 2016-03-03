@@ -20,9 +20,9 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.JacksonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by David on 1/20/2016.
@@ -116,7 +116,7 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
             call.enqueue(new Callback<List<BusInfo>>() {
 
                 @Override
-                public void onResponse(Response<List<BusInfo>> response) {
+                public void onResponse(Call<List<BusInfo>> call, Response<List<BusInfo>> response) {
                     if (response.isSuccess()) {
                         switch (str){
                             case "A":
@@ -146,7 +146,7 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
                 }
 
                 @Override
-                public void onFailure(Throwable t) {
+                public void onFailure(Call<List<BusInfo>> call, Throwable t) {
                     Log.e("<Error>", t.getLocalizedMessage() + "");
                 }
             });
