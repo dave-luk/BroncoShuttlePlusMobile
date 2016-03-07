@@ -37,7 +37,6 @@ public class DetailsViewActivity extends FragmentActivity {
                 } else {
                     mDetailsTabHost.setCurrentTab(mDetailsTabHost.getCurrentTab() - 1);
                 }
-                //   Call.Details.this.overridePendingTransition(R.anim.nothing, R.anim.nothing);
             }
 
             @Override
