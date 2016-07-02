@@ -128,10 +128,9 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                     .addConverterFactory(JacksonConverterFactory.create())
                     .build();
 
-            for (String number : routes) {
-
+            for (String str : routes) {
                 SimpleRouteInfoService simpleRouteInfoService = retrofit.create(SimpleRouteInfoService.class);
-                Call<SimpleRouteInfo> call = simpleRouteInfoService.getInfo(Integer.parseInt(number));
+                Call<SimpleRouteInfo> call = simpleRouteInfoService.getInfo(str.replace("ROUTE ", ""));
                 call.enqueue(new Callback<SimpleRouteInfo>() {
 
                     @Override

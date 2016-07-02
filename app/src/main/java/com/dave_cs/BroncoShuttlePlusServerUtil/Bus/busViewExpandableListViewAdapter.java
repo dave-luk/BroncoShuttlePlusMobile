@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by David on 2/4/2016.
@@ -20,52 +20,26 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
 
     private Context context;
 
-    private List<String> headers;
-    private List<BusInfo> listA;
-    private List<BusInfo> listB1;
-    private List<BusInfo> listB2;
-    private List<BusInfo> listC;
+    private ArrayList<String> headers;
+    private ArrayList<ArrayList<BusInfo>> masterList;
 
-    public busViewExpandableListViewAdapter(Context ctx, List<String> headers, List<BusInfo> A, List<BusInfo> B1,List<BusInfo> B2,List<BusInfo> C)
+    public busViewExpandableListViewAdapter(Context ctx, ArrayList<String> headers, ArrayList<ArrayList<BusInfo>> masterList)
     {
         this.context = ctx;
         this.headers = headers;
-        this.listA = A;
-        this.listB1 = B1;
-        this.listB2 = B2;
-        this.listC = C;
+        this.masterList = masterList;
     }
 
     public void removeAll()
     {
-        listA.clear();
-        listB1.clear();
-        listB2.clear();
-        listC.clear();
+        headers.clear();
+        headers.clear();
         notifyDataSetChanged();
     }
 
-    public void add(List list, String route)
+    public void add(ArrayList list, String route)
     {
-        switch(route)
-        {
-            case "A":
-                listA.addAll(list);
-                notifyDataSetChanged();
-                break;
-            case "B1":
-                listB1.addAll(list);
-                notifyDataSetChanged();
-                break;
-            case "B2":
-                listB2.addAll(list);
-                notifyDataSetChanged();
-                break;
-            case "C":
-                listC.addAll(list);
-                notifyDataSetChanged();
-                break;
-        }
+        masterList.get(headers.indexOf(route)).addAll(list);
     }
 
     @Override
@@ -75,19 +49,7 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        switch(groupPosition)
-        {
-            case 0:
-                return listA.size();
-            case 1:
-                return listB1.size();
-            case 2:
-                return listB2.size();
-            case 3:
-                return listC.size();
-            default:
-                return 0;
-        }
+        return masterList.get(groupPosition).size();
     }
 
     @Override
@@ -97,19 +59,7 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        switch(groupPosition)
-        {
-            case 0:
-                return listA.get(childPosition);
-            case 1:
-                return listB1.get(childPosition);
-            case 2:
-                return listB2.get(childPosition);
-            case 3:
-                return listC.get(childPosition);
-            default:
-                return null;
-        }
+        return masterList.get(groupPosition).get(childPosition);
     }
 
     @Override
