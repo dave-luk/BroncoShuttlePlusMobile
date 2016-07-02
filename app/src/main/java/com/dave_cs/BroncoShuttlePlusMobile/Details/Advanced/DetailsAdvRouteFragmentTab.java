@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.Details.DetailsViewActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
@@ -44,6 +45,7 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
 
     private AdvRouteViewExpandableListViewAdapter listAdapter;
+    private TextView textView;
     private ExpandableListView expandableListView;
     private List<String> headers;
 
@@ -70,6 +72,11 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.details_adv_route_fragment_layout, container, false);
+
+        textView = (TextView) v.findViewById(R.id.textRoute);
+        textView.setAllCaps(true);
+        textView.setSingleLine();
+        textView.setText(routeName);
 
         OnSwipeTouchListener swipeTouchListener = new OnSwipeTouchListener(getActivity()){
             @Override

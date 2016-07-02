@@ -9,5 +9,5 @@ import retrofit2.http.Query;
  */
 public interface SimpleRouteInfoService  {
     @GET("/BroncoShuttlePlus/details/simpleRoute")
-    Call<SimpleRouteInfo> getInfo(@Query("routeName") String name);
+    Call<SimpleRouteInfo> getInfo(@Query("routeName") int number);
 }

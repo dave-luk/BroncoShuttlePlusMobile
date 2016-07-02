@@ -87,9 +87,8 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     private Handler uiCallback = new Handler() {
         public void handleMessage(Message msg) {
-            if (hasPoly != -1) {
+            if (hasPoly != -1)
                 updateBusLocation(routeList[hasPoly]);
-            }
         }
     };
 
@@ -118,7 +117,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         leftDrawer.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                togglePolyline(routeList[position], ((hasPoly == -1 || hasPoly != position)));
+                togglePolyline(routeList[position], ((hasPoly == -1 || hasPoly != position) ? true : false));
                 drawerLayout.closeDrawers();
             }
         });
@@ -273,43 +272,6 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
         });
     }
-
-    private void getBusLocation(final Marker m, final Object info) {
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://dave-cs.com")
-                .addConverterFactory(JacksonConverterFactory.create())
-                .client(client)
-                .build();
-
-        LocationService locationService = retrofit.create(LocationService.class);
-        Log.d("<Query>", "the bus id passed is: " + ((BusInfo) info).getBusNumber());
-        Call<Location> busCall = locationService.getLocation(null, ((BusInfo) info).getBusNumber());
-        busCall.enqueue(new Callback<Location>() {
-            @Override
-            public void onResponse(Call<Location> call, Response<Location> response) {
-                if (response.isSuccess()) {
-                    Location l = response.body();
-                    LatLng location = new LatLng(l.getLat(), l.getLng());
-                    Log.d("<Location>", "location of bus is:" + l.getLat() + " | " + location);
-                    m.setPosition(location);
-                } else {
-                    Log.e("<Error>", response.code() + ":" + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Location> call, Throwable t) {
-                Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
-            }
-        });
-    }
-
 
     private void getLocation(final String type, final Object info, final int route, final int index) {
 
@@ -467,7 +429,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
                         // do stuff in a separate thread
                         uiCallback.sendEmptyMessage(0);
                         try {
-                            Thread.sleep(2000);    // sleep for 2 seconds
+                            Thread.sleep(3000);    // sleep for 3 seconds
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -486,40 +448,37 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
         } else {
             hasPoly = -1;
-            BusMarkers.clear();
+
         }
     }
 
     private void updateBusLocation(int route) {
-        if (BusMarkers.isEmpty()) {
-            switch (route) {
-                case 3164:
-                    for (int i = 0; i < ABus.size(); i++) {
-                        getLocation("bus", ABus.get(i), route, i);
-                    }
-                    break;
-                case 3166:
+        for (Marker m : BusMarkers)
+            m.remove();
+        BusMarkers.clear();
+        switch (route) {
+            case 3164:
+                for (int i = 0; i < ABus.size(); i++) {
+                    getLocation("bus", ABus.get(i), route, i);
+                }
+                break;
+            case 3166:
 
-                    for (int i = 0; i < B1Bus.size(); i++) {
-                        getLocation("bus", B1Bus.get(i), route, i);
-                    }
-                    break;
-                case 3167:
+                for (int i = 0; i < B1Bus.size(); i++) {
+                    getLocation("bus", B1Bus.get(i), route, i);
+                }
+                break;
+            case 3167:
 
-                    for (int i = 0; i < B2Bus.size(); i++) {
-                        getLocation("bus", B2Bus.get(i), route, i);
-                    }
-                    break;
-                case 3162:
-                    for (int i = 0; i < CBus.size(); i++) {
-                        getLocation("bus", CBus.get(i), route, i);
-                    }
-                    break;
-            }
-        } else {
-            for (int i = 0; i < BusMarkers.size(); i++) {
-                getBusLocation(BusMarkers.get(i), getBusList(route).get(i));
-            }
+                for (int i = 0; i < B2Bus.size(); i++) {
+                    getLocation("bus", B2Bus.get(i), route, i);
+                }
+                break;
+            case 3162:
+                for (int i = 0; i < CBus.size(); i++) {
+                    getLocation("bus", CBus.get(i), route, i);
+                }
+                break;
         }
     }
 

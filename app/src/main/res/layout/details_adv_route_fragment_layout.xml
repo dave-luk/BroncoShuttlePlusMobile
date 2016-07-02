@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <TextView
+        android:id="@+id/textRoute"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/adv_routeList_refresh_widget">
+        android:gravity="center_horizontal"
+        android:textSize="24dp" />
 
-    <ExpandableListView
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/adv_routeList_refresh_widget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ExpandableListView
         android:id="@+id/expLV"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>
