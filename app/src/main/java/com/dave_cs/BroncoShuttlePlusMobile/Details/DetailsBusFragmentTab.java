@@ -42,6 +42,7 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         propagateHeaders();
+
     }
 
     @Override
@@ -112,7 +113,7 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
                 .build();
 
         RouteOnlineService routeOnlineService = retrofit.create(RouteOnlineService.class);
-        Call<String[]> data = routeOnlineService.getInfo();
+        Call<String[]> data = routeOnlineService.getInfo("name");
         data.enqueue(new Callback<String[]>() {
             @Override
             public void onResponse(Call<String[]> call, Response<String[]> response) {

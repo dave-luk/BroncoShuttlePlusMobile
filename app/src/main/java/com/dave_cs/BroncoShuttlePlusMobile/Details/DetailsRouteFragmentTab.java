@@ -84,12 +84,13 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putString("routeName", info.getRouteName());
                 newFrag.setArguments(bundle);
+                Log.d("<Clicked>", "new frag set!");
                 getFragmentManager()
                         .beginTransaction()
-                        .hide(DetailsRouteFragmentTab.this)
-                        .add(android.R.id.tabcontent, newFrag, info.getRouteName() + "")
+                        .replace(R.id.details_pager, newFrag, info.getRouteName() + "")
                         .addToBackStack("simpleRoute")
                         .commit();
+                Log.d("<Transition>", "next frag");
             }
         });
         return v;
@@ -102,7 +103,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
                 .build();
 
         RouteOnlineService routeOnlineService = retrofit.create(RouteOnlineService.class);
-        Call<String[]> data = routeOnlineService.getInfo();
+        Call<String[]> data = routeOnlineService.getInfo("name");
         data.enqueue(new Callback<String[]>() {
             @Override
             public void onResponse(Call<String[]> call, Response<String[]> response) {

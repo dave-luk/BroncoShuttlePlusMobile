@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:id="@+id/item_stop_box"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/item_stop_box">
+    android:orientation="vertical">
 
     <TextView
+        android:id="@+id/item_stop_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginLeft="10dp"
         android:text="Stop"
-        android:id="@+id/item_stop_name" />
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
+        android:id="@+id/item_stop_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginLeft="10dp"
         android:text="next Bus is"
-        android:id="@+id/item_stop_next" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
+        android:id="@+id/item_stop_next_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Time"
-        android:id="@+id/item_stop_next_time" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

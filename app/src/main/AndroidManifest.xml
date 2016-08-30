@@ -28,7 +28,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme.DarkNoActionBar">
 
         <!-- Google Maps Fragment API Key Data -->
         <meta-data
@@ -59,7 +59,7 @@
                 android:value="com.dave_cs.BroncoShuttlePlusMobile.MainMenuActivity" />
         </activity>
         <activity
-            android:name=".Details.DetailsViewActivity"
+            android:name=".Details.ViewPagerDetailsViewActivity"
             android:label="@string/title_activity_details"
             android:parentActivityName=".MainMenuActivity"
             android:screenOrientation="portrait">

@@ -76,8 +76,7 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
                 newFrag.setArguments(bundle);
                 getFragmentManager()
                         .beginTransaction()
-                        .hide(DetailsStopFragmentTab.this)
-                        .add(android.R.id.tabcontent, newFrag, "stop frag")
+                        .replace(R.id.details_pager, newFrag, "stop frag")
                         .addToBackStack("simpleStop")
                         .commit();
             }

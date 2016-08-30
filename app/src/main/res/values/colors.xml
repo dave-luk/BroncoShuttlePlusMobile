@@ -5,6 +5,7 @@
     <color name="colorPrimary">#888888</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#5F9461</color>
+    <color name="colorLightBg">#b4cfb5</color>
     <color name="colorAccentTransparent">#5109af32</color>
 
     <!-- bg color -->

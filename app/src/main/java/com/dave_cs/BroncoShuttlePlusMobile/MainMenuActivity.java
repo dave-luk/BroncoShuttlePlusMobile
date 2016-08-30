@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.dave_cs.BroncoShuttlePlusMobile.Details.DetailsViewActivity;
+import com.dave_cs.BroncoShuttlePlusMobile.Details.ViewPagerDetailsViewActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.LiveMaps.LiveMapsActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.Options.OptionsActivity;
 
@@ -43,7 +43,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.e("debug", "details Pressed!");
-                currObj = (new Intent(MainMenuActivity.this, DetailsViewActivity.class));
+                currObj = (new Intent(MainMenuActivity.this, ViewPagerDetailsViewActivity.class));
                 startActivity(currObj);
             }
         });

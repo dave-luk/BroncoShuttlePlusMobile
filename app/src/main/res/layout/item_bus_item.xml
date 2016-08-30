@@ -9,6 +9,7 @@
         android:id="@+id/item_bus_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
         android:text="Name"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -16,6 +17,7 @@
         android:id="@+id/item_bus_fullness"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
         android:text="Fullness"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -23,6 +25,7 @@
         android:id="@+id/item_bus_nextStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
         android:text="Next Stop"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -30,6 +33,7 @@
         android:id="@+id/item_bus_lastUpdate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
         android:text="Last Updated"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
