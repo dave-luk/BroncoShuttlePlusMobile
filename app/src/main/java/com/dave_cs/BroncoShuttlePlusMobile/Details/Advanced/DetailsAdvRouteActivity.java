@@ -1,6 +1,7 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -84,34 +85,22 @@ public class DetailsAdvRouteActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
-//                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
-//                Bundle bundle = new Bundle();
+                //android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
+                Intent intent = new Intent(DetailsAdvRouteActivity.this, DetailsAdvActivity.class);
 
-//                switch (groupPosition) {
-//                    case 0:
-//                        BusInfo busInfo = (BusInfo) listAdapter.getChild(groupPosition, childPosition);
-//                        bundle.putString("busName", busInfo.getBusName());
-//                        bundle.putInt("busNumber", busInfo.getBusNumber());
-//                        newFrag.setArguments(bundle);
-//                        getFragmentManager()
-//                                .beginTransaction()
-//                                .hide(DetailsAdvRouteFragmentTab.this)
-//                                .add(android.R.id.tabcontent, newFrag, "bus frag")
-//                                .addToBackStack("advRoute")
-//                                .commit();
-//                        break;
-//                    case 1:
-//                        StopInfo stopInfo = (StopInfo) listAdapter.getChild(groupPosition, childPosition);
-//                        bundle.putString("stopName", stopInfo.getName());
-//                        bundle.putInt("stopNumber", stopInfo.getStopNumber());
-//                        newFrag.setArguments(bundle);
-//                        getFragmentManager()
-//                                .beginTransaction()
-//                                .hide(DetailsAdvRouteFragmentTab.this)
-//                                .add(android.R.id.tabcontent, newFrag, "stop frag")
-//                                .addToBackStack("advRoute")
-//                                .commit();
-//                }
+                switch (groupPosition) {
+                    case 0:
+                        BusInfo busInfo = (BusInfo) listAdapter.getChild(groupPosition, childPosition);
+                        intent.putExtra("busName", busInfo.getBusName());
+                        intent.putExtra("busNumber", busInfo.getBusNumber());
+                        startActivity(intent);
+                        break;
+                    case 1:
+                        StopInfo stopInfo = (StopInfo) listAdapter.getChild(groupPosition, childPosition);
+                        intent.putExtra("stopName", stopInfo.getName());
+                        intent.putExtra("stopNumber", stopInfo.getStopNumber());
+                        startActivity(intent);
+                }
                 return true;
             }
         });
