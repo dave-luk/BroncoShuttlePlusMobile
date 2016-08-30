@@ -4,19 +4,16 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
-import com.dave_cs.BroncoShuttlePlusMobile.Details.DetailsViewActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
-import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.AdvRouteViewExpandableListViewAdapter;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.RouteInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.RouteInfoService;
@@ -34,7 +31,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by David on 1/25/2016.
  */
-public class DetailsAdvRouteFragmentTab extends Fragment {
+public class DetailsAdvRouteActivity extends AppCompatActivity {
 
     private RouteInfo routeInfo;
 
@@ -56,40 +53,22 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
         if(networkInfo != null && networkInfo.isConnected()) {
-            routeName = getArguments().getString("routeName");
+            routeName = getIntent().getExtras().getString("routeName");
             propagate();
         }
         else {
             busInfoList.add(new BusInfo());
             stopInfoList.add(new StopInfo());
         }
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.details_adv_route_fragment_layout, container, false);
+        setContentView(R.layout.activity_details_adv_route);
 
-        textView = (TextView) v.findViewById(R.id.textRoute);
-        textView.setAllCaps(true);
-        textView.setSingleLine();
-        textView.setText(routeName);
-
-        OnSwipeTouchListener swipeTouchListener = new OnSwipeTouchListener(getActivity()){
-            @Override
-            public void onSwipeLeft() {
-                if(getFragmentManager() != null)
-                getFragmentManager().popBackStackImmediate();
-                ((DetailsViewActivity) getActivity()).unregisterSwipeLister(this);
-            }
-        };
-
-        ((DetailsViewActivity) getActivity()).registerSwipeListener(swipeTouchListener);
-
-        swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.adv_routeList_refresh_widget);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.adv_routeList_refresh_widget);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -99,52 +78,54 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
             }
         });
 
-        expandableListView = (ExpandableListView) v.findViewById(R.id.expLV);
+        expandableListView = (ExpandableListView) findViewById(R.id.expLV);
         expandableListView.setItemsCanFocus(true);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
-                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
-                Bundle bundle = new Bundle();
+//                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
+//                Bundle bundle = new Bundle();
 
-                switch (groupPosition) {
-                    case 0:
-                        BusInfo busInfo = (BusInfo) listAdapter.getChild(groupPosition, childPosition);
-                        bundle.putString("busName", busInfo.getBusName());
-                        bundle.putInt("busNumber", busInfo.getBusNumber());
-                        newFrag.setArguments(bundle);
-                        getFragmentManager()
-                                .beginTransaction()
-                                .hide(DetailsAdvRouteFragmentTab.this)
-                                .add(android.R.id.tabcontent, newFrag, "bus frag")
-                                .addToBackStack("advRoute")
-                                .commit();
-                        break;
-                    case 1:
-                        StopInfo stopInfo = (StopInfo) listAdapter.getChild(groupPosition, childPosition);
-                        bundle.putString("stopName", stopInfo.getName());
-                        bundle.putInt("stopNumber", stopInfo.getStopNumber());
-                        newFrag.setArguments(bundle);
-                        getFragmentManager()
-                                .beginTransaction()
-                                .hide(DetailsAdvRouteFragmentTab.this)
-                                .add(android.R.id.tabcontent, newFrag, "stop frag")
-                                .addToBackStack("advRoute")
-                                .commit();
-                }
+//                switch (groupPosition) {
+//                    case 0:
+//                        BusInfo busInfo = (BusInfo) listAdapter.getChild(groupPosition, childPosition);
+//                        bundle.putString("busName", busInfo.getBusName());
+//                        bundle.putInt("busNumber", busInfo.getBusNumber());
+//                        newFrag.setArguments(bundle);
+//                        getFragmentManager()
+//                                .beginTransaction()
+//                                .hide(DetailsAdvRouteFragmentTab.this)
+//                                .add(android.R.id.tabcontent, newFrag, "bus frag")
+//                                .addToBackStack("advRoute")
+//                                .commit();
+//                        break;
+//                    case 1:
+//                        StopInfo stopInfo = (StopInfo) listAdapter.getChild(groupPosition, childPosition);
+//                        bundle.putString("stopName", stopInfo.getName());
+//                        bundle.putInt("stopNumber", stopInfo.getStopNumber());
+//                        newFrag.setArguments(bundle);
+//                        getFragmentManager()
+//                                .beginTransaction()
+//                                .hide(DetailsAdvRouteFragmentTab.this)
+//                                .add(android.R.id.tabcontent, newFrag, "stop frag")
+//                                .addToBackStack("advRoute")
+//                                .commit();
+//                }
                 return true;
             }
         });
         setUpList();
-        listAdapter = new AdvRouteViewExpandableListViewAdapter(getContext(), headers, busInfoList, stopInfoList);
+        listAdapter = new AdvRouteViewExpandableListViewAdapter(this, headers, busInfoList, stopInfoList);
         expandableListView.setAdapter(listAdapter);
         for(int i =0; i < listAdapter.getGroupCount(); i++)
         {
             expandableListView.expandGroup(i);
         }
 
-        return v;
+        Toolbar toolbar = (Toolbar) findViewById(R.id.advBar);
+        toolbar.setTitle(routeName);
+        setSupportActionBar(toolbar);
     }
 
     private void setUpList() {
@@ -172,6 +153,8 @@ public class DetailsAdvRouteFragmentTab extends Fragment {
                         listAdapter.removeAll();
                         listAdapter.add(routeInfo.getBusOnRoute());
                         listAdapter.add(routeInfo.getStopsOnRoute());
+                        listAdapter.notifyDataSetChanged();
+                        Log.d("<data>", "data got and notified");
                     } else {
                         Log.d("<Error>", "" + response.code());
                     }

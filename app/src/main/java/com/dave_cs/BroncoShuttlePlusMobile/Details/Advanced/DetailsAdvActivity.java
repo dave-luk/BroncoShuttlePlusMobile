@@ -5,20 +5,18 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.dave_cs.BroncoShuttlePlusMobile.Details.DetailsViewActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfoService;
@@ -46,8 +44,10 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by David on 2/7/2016.
  */
-public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallback {
+public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+
+    private FragmentManager fm = getSupportFragmentManager();
     private SupportMapFragment mapFragment;
     private GoogleMap googleMap;
     private LatLng location = new LatLng(34.056781, -117.821071);
@@ -66,50 +66,15 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
     private int id;
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        FragmentManager fm = getChildFragmentManager();
-        mapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map_frag);
-        if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            fm.beginTransaction().replace(R.id.map_frag, mapFragment).commit();
-        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((DetailsViewActivity) getActivity()).setSuspend(true);
 
-        // get the type from bundles, write to lat-lng
-        try {
-            int stopID = getArguments().getInt("stopNumber");
-            String stopName = getArguments().getString("stopName");
-            int busID = getArguments().getInt("busNumber");
-            String busName = getArguments().getString("busName");
-            if (stopID != 0) {
-                name = stopName;
-                type = "stop";
-                id = stopID;
-            } else if (busID != 0) {
-                name = busName;
-                type = "bus";
-                id = busID;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        getLocation();
-        getInfo();
-    }
+        setContentView(R.layout.activity_details_adv);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.details_adv_fragment_layout, container, false);
-        refocus = (ImageButton) v.findViewById(R.id.refocus_icon);
-        detailsInfo = (FrameLayout) v.findViewById(R.id.details_frag_holder);
+        refocus = (ImageButton) findViewById(R.id.refocus_icon);
+        detailsInfo = (FrameLayout) findViewById(R.id.details_frag_holder);
 
-        swipeRefreshLayout = new SwipeRefreshLayout(getContext());
+        swipeRefreshLayout = new SwipeRefreshLayout(this);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -119,7 +84,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
         });
 
         if (detailsInfo != null) {
-            linearLayout = new LinearLayout(getContext());
+            linearLayout = new LinearLayout(this);
             linearLayout.setBackgroundColor(Color.WHITE);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
@@ -138,8 +103,39 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 }
             }
         });
-        return v;
+
+        mapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map_frag);
+        if (mapFragment == null) {
+            mapFragment = SupportMapFragment.newInstance();
+            fm.beginTransaction().replace(R.id.map_frag, mapFragment).commit();
+        }
+
+        // get the type from bundles, write to lat-lng
+        try {
+            int stopID = getIntent().getExtras().getInt("stopNumber");
+            String stopName = getIntent().getExtras().getString("stopName");
+            int busID = getIntent().getExtras().getInt("busNumber");
+            String busName = getIntent().getExtras().getString("busName");
+            if (stopID != 0) {
+                name = stopName;
+                type = "stop";
+                id = stopID;
+            } else if (busID != 0) {
+                name = busName;
+                type = "bus";
+                id = busID;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        getLocation();
+        getInfo();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.advBar);
+        toolbar.setTitle(name);
+        setSupportActionBar(toolbar);
     }
+
 
     @Override
     public void onDestroy() {
@@ -153,7 +149,6 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
             }
             googleMap = null;
         }
-        ((DetailsViewActivity) getActivity()).setSuspend(false);
     }
 
     @Override
@@ -162,7 +157,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
         this.googleMap = googleMap;
 
         Log.d("<Maps>", "got a location. displaying" + location.toString());
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -175,7 +170,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
         googleMap.setMyLocationEnabled(true);
         initMarker();
 
-        getChildFragmentManager().beginTransaction().replace(R.id.map_frag, mapFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.map_frag, mapFragment).commit();
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -198,7 +193,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
             mapFragment = SupportMapFragment.newInstance();
         }
 
-        getChildFragmentManager().beginTransaction().replace(R.id.map_frag, mapFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.map_frag, mapFragment).commit();
     }
 
     @Override
@@ -211,10 +206,10 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
 
     private void initInfo() {
 
-        TextView title = new TextView(getContext());
+        TextView title = new TextView(this);
         title.setText(name);
         title.setTextColor(Color.WHITE);
-        title.setBackgroundColor(Color.BLACK);
+        title.setBackgroundColor(Color.parseColor("#b4cfb5"));
         title.setSingleLine(true);
         title.setEllipsize(TextUtils.TruncateAt.END);
         title.setTextSize(24);
@@ -223,7 +218,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
         titleParams.weight = 30f;
         title.setLayoutParams(titleParams);
 
-        innerLayout = new LinearLayout(getContext());
+        innerLayout = new LinearLayout(this);
         innerLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
         frameParams.weight = 70f;
@@ -234,7 +229,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 case "stop":
                     StopInfo stopInfo = (StopInfo) info;
 
-                    TextView routes = new TextView(getContext());
+                    TextView routes = new TextView(this);
                     routes.setText("Routes: " + stopInfo.getOnRoute());
                     routes.setTextColor(Color.BLACK);
                     routes.setTextSize(20);
@@ -253,7 +248,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     LinearLayout.LayoutParams routeParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     routes.setLayoutParams(routeParams);
 
-                    TextView nextBus = new TextView(getContext());
+                    TextView nextBus = new TextView(this);
                     nextBus.setText(nextBusStr);
                     nextBus.setTextColor(Color.BLACK);
                     nextBus.setTextSize(20);
@@ -261,7 +256,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     LinearLayout.LayoutParams nextBusParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     nextBus.setLayoutParams(nextBusParams);
 
-                    TextView nextBusTime = new TextView(getContext());
+                    TextView nextBusTime = new TextView(this);
                     nextBusTime.setText(nextTime);
                     nextBusTime.setTextColor(Color.BLACK);
                     nextBusTime.setTextSize(20);
@@ -277,7 +272,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                 case "bus":
                     BusInfo busInfo = (BusInfo) info;
 
-                    TextView busRoute = new TextView(getContext());
+                    TextView busRoute = new TextView(this);
                     busRoute.setText("Route: " + busInfo.getRoute());
                     busRoute.setTextColor(Color.BLACK);
                     busRoute.setTextSize(20);
@@ -294,7 +289,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                         fullnessStr = Integer.toString(x) + "% full. Full seated.";
                     }
 
-                    TextView fullness = new TextView(getContext());
+                    TextView fullness = new TextView(this);
                     fullness.setText(fullnessStr);
                     fullness.setTextColor(Color.BLACK);
                     fullness.setTextSize(20);
@@ -302,7 +297,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
                     LinearLayout.LayoutParams fullnessParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     fullness.setLayoutParams(fullnessParams);
 
-                    TextView nextStop = new TextView(getContext());
+                    TextView nextStop = new TextView(this);
                     nextStop.setText("Next Stop: " + busInfo.getNextStop());
                     nextStop.setTextColor(Color.BLACK);
                     nextStop.setTextSize(20);
@@ -326,6 +321,7 @@ public class DetailsAdvFragmentTab extends Fragment implements OnMapReadyCallbac
             swipeRefreshLayout.setRefreshing(false);
         swipeRefreshLayout.addView(linearLayout);
         detailsInfo.addView(swipeRefreshLayout);
+
     }
 
     private void clearView() {

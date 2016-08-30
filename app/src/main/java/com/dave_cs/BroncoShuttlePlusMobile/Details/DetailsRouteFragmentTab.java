@@ -1,5 +1,6 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvRouteFragmentTab;
+import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvRouteActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.RouteOnlineService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfo;
@@ -80,17 +81,10 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SimpleRouteInfo info = (SimpleRouteInfo) listView.getItemAtPosition(position);
-                android.support.v4.app.Fragment newFrag = new DetailsAdvRouteFragmentTab();
-                Bundle bundle = new Bundle();
-                bundle.putString("routeName", info.getRouteName());
-                newFrag.setArguments(bundle);
-                Log.d("<Clicked>", "new frag set!");
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.details_pager, newFrag, info.getRouteName() + "")
-                        .addToBackStack("simpleRoute")
-                        .commit();
-                Log.d("<Transition>", "next frag");
+
+                Intent intent = new Intent(getActivity(), DetailsAdvRouteActivity.class);
+                intent.putExtra("routeName", info.getRouteName());
+                startActivity(intent);
             }
         });
         return v;

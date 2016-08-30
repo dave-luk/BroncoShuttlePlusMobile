@@ -82,6 +82,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.dave_cs.BroncoShuttlePlusMobile.MainMenuActivity" />
         </activity>
+
+        <activity android:name=".Details.Advanced.DetailsAdvRouteActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.dave_cs.BroncoShuttlePlusMobile.Details.ViewPagerDetailsViewActivity" />
+        </activity>
+
+        <activity android:name=".Details.Advanced.DetailsAdvActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.dave_cs.BroncoShuttlePlusMobile.Details.ViewPagerDetailsViewActivity" />
+        </activity>
     </application>
 
 </manifest>

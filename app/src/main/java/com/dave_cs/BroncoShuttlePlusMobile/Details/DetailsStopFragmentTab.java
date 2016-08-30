@@ -1,5 +1,6 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -9,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvFragmentTab;
+import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfoFastScrollAdapter;
@@ -69,16 +70,10 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
         stopListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
-                Bundle bundle = new Bundle();
-                bundle.putString("stopName", stopInfoList.get(position).getName());
-                bundle.putInt("stopNumber", stopInfoList.get(position).getStopNumber());
-                newFrag.setArguments(bundle);
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.details_pager, newFrag, "stop frag")
-                        .addToBackStack("simpleStop")
-                        .commit();
+                Intent intent = new Intent(getActivity(), DetailsAdvActivity.class);
+                intent.putExtra("stopName", stopInfoList.get(position).getName());
+                intent.putExtra("stopNumber", stopInfoList.get(position).getStopNumber());
+                startActivity(intent);
             }
         });
 

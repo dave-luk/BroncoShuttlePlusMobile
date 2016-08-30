@@ -1,5 +1,6 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -8,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
-import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvFragmentTab;
+import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusListService;
@@ -66,18 +67,13 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
-                Bundle bundle = new Bundle();
                 BusInfo busInfo = (BusInfo) listAdapter.getChild(groupPosition, childPosition);
-                bundle.putString("busName", busInfo.getBusName());
-                bundle.putInt("busNumber", busInfo.getBusNumber());
-                newFrag.setArguments(bundle);
-                getFragmentManager()
-                        .beginTransaction()
-                        .hide(DetailsBusFragmentTab.this)
-                        .add(android.R.id.tabcontent, newFrag, "bus frag")
-                        .addToBackStack("simpleBus")
-                        .commit();
+
+                Intent intent = new Intent(getActivity(), DetailsAdvActivity.class);
+                intent.putExtra("busName", busInfo.getBusName());
+                intent.putExtra("busNumber", busInfo.getBusNumber());
+                startActivity(intent);
+
                 return true;
             }
         });

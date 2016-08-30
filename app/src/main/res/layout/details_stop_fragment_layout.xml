@@ -15,8 +15,7 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:divider="@android:color/white"
-        android:dividerHeight="2px"
-        android:listSelector="@color/darkGray" />
+        android:dividerHeight="2px" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
