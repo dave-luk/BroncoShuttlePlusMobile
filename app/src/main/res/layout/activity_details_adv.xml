@@ -29,7 +29,7 @@
                 class="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".Details.DetailsViewActivity" />
+                tools:context=".Details.ViewPagerDetailsViewActivity" />
 
             <ImageButton
                 android:id="@+id/refocus_icon"

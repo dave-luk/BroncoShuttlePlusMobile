@@ -60,7 +60,8 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
     private ArrayList<ArrayList<StopInfo>> masterStopList = new ArrayList<>();
     private ArrayList<ArrayList<BusInfo>> masterBusList = new ArrayList<>();
 
-    private ArrayList<ArrayList<Marker>> BusMarkers = new ArrayList<>();
+    private ArrayList<ArrayList<Marker>> busMarkers = new ArrayList<>();
+    private ArrayList<ArrayList<MarkerOptions>> stopMarkers = new ArrayList<>();
     private LatLngBounds.Builder boundsBuilder;
     private LatLngBounds.Builder stopBoundsBuilder = new LatLngBounds.Builder();
     private LatLngBounds bounds;
@@ -82,7 +83,19 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
     private Handler uiCallback = new Handler() {
         public void handleMessage(Message msg) {
             if (hasPoly != -1)
-                updateBusLocation(Integer.parseInt(routes.get(hasPoly)));
+                updateBusLocation(routes.get(hasPoly));
+        }
+    };
+
+    private Handler populateMarkers = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (hasPoly != -1) {
+                int index = msg.getData().getInt("index");
+                Log.d("<MARKER>: ", "added markers: " + stopMarkers.get(index).size());
+                for (MarkerOptions markerOptions : stopMarkers.get(index))
+                    mMap.addMarker(markerOptions);
+            }
         }
     };
 
@@ -108,7 +121,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         leftDrawer.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                togglePolyline(Integer.parseInt(routes.get(position)), ((hasPoly == -1 || hasPoly != position) ? true : false));
+                togglePolyline(routes.get(position), ((hasPoly == -1 || hasPoly != position) ? true : false));
                 drawerLayout.closeDrawers();
             }
         });
@@ -133,6 +146,8 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
                         masterStopList.add(new ArrayList<StopInfo>());
                         masterBusList.add(new ArrayList<BusInfo>());
                         masterRouteOptions.add(new PolylineOptions());
+                        stopMarkers.add(new ArrayList<MarkerOptions>());
+                        busMarkers.add(new ArrayList<Marker>());
                         getPolyLine(s);
                         getRouteInfo(s);
                         getBusInfo(s);
@@ -200,6 +215,10 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
                     Log.d("<Success>", "received data");
                     masterStopList.get(routes.indexOf(r)).addAll(response.body());
                     stopsReady++;
+                    Log.d("<List>", "" + masterStopList.get(routes.indexOf(r)).size());
+                    for (int i = 0; i < masterStopList.get(routes.indexOf(r)).size(); i++) {
+                        getLocation("stop", masterStopList.get(routes.indexOf(r)).get(i), r, i);
+                    }
                 } else {
                     Log.d("<Error>", "" + response.code());
                 }
@@ -244,7 +263,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         });
     }
 
-    private void getLocation(final String type, final Object info, final int route, final int index) {
+    private void getLocation(final String type, final Object info, final String route, final int index) {
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
@@ -310,29 +329,31 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    private void initMarker(Object o, LatLng location, String type, int route, int index) {
+    private void initMarker(Object o, LatLng location, String type, String route, int index) {
         if (mMap != null) {
             Log.d("<Marker>", "Updated marker to: " + location);
             stopBoundsBuilder.include(location);
             stopBoundsCounter++;
-            if (o instanceof StopInfo) {
-                mMap.addMarker(new MarkerOptions().position(location).title(((StopInfo) o).getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_stop_icon)).snippet(type + " " + route + " " + index));
-            } else if (o instanceof BusInfo) {
+            if (o instanceof StopInfo)
+                stopMarkers.get(routes.indexOf(route)).add(new MarkerOptions().position(location).title(((StopInfo) o).getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_stop_icon)).snippet(type + " " + route + " " + index));
+            else if (o instanceof BusInfo) {
                 try {
-                    Marker curr = BusMarkers.get(routes.indexOf(route)).get(index);
+                    Marker curr = busMarkers.get(routes.indexOf(route)).get(index);
                     if (curr.getTitle().equals(((BusInfo) o).getBusName()))
                         curr.setPosition(location);
+                    else
+                        busMarkers.get(routes.indexOf(route)).add(mMap.addMarker(new MarkerOptions().position(location).title(((BusInfo) o).getBusName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon))));
                 } catch (Exception e) {
 
                 }
-                BusMarkers.get(routes.indexOf(route)).add(mMap.addMarker(new MarkerOptions().position(location).title(((BusInfo) o).getBusName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon))));
+
             }
 
 
         }
     }
 
-    public void togglePolyline(int route, boolean state) {
+    public void togglePolyline(String route, boolean state) {
         if (polyReady != busReady && busReady != stopsReady && stopsReady != routes.size()) return;
 
         mMap.clear();
@@ -340,7 +361,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         if (state) {
             boundsBuilder = new LatLngBounds.Builder();
 
-            int index = routes.indexOf(Integer.toString(route));
+            final int index = routes.indexOf(route);
             Log.d("<List>", routes.toString());
             Log.d("<PolyLine>", "Index is: " + index + " | " + route);
 
@@ -358,9 +379,19 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
                 hasPoly = index;
             }
 
-            for (int i = 0; i < masterStopList.get(index).size(); i++) {
-                getLocation("stop", masterStopList.get(index).get(i), route, i);
-            }
+            Log.d("<Pre-thread>: ", "this is before thread " + stopMarkers.get(index).size() + " | " + masterStopList.get(index).size());
+            Thread asyncMarkers = new Thread() {
+                public void run() {
+                    while (stopMarkers.get(index).size() != masterStopList.get(index).size() || stopMarkers.get(index).size() == 0) {
+                    }
+                    Bundle data = new Bundle();
+                    data.putInt("index", index);
+                    Message msg = new Message();
+                    msg.setData(data);
+                    populateMarkers.sendMessage(msg);
+                }
+            };
+            asyncMarkers.start();
 
             updateBusLocation(route);
 
@@ -392,10 +423,10 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    private void updateBusLocation(int route) {
+    private void updateBusLocation(String route) {
         int index = routes.indexOf(route);
         if (index != -1)
-            for (int i = 0; i < BusMarkers.get(index).size(); i++)
+            for (int i = 0; i < busMarkers.get(index).size(); i++)
                 getLocation("bus", masterBusList.get(index).get(i), route, i);
     }
 

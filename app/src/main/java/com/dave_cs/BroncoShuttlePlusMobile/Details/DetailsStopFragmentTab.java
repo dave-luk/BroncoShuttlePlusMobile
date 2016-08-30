@@ -116,5 +116,4 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
         });
     }
 
-
 }

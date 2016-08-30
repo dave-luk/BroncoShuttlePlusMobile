@@ -5,6 +5,8 @@
 
     <!-- Strings related to Settings -->
 
+    <string name="search_hint">Search the Directory</string>
+
     <!-- Example General settings -->
     <string name="pref_header_customize">Customization</string>
 

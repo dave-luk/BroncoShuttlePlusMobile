@@ -14,11 +14,9 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
-import com.dave_cs.BroncoShuttlePlusServerUtil.OnSwipeTouchListener;
 
 import java.util.List;
 
@@ -102,14 +100,6 @@ public class OptionsActivity extends AppCompatPreferenceActivity {
         super.onCreate(savedInstanceState);
         setupActionBar();
 
-        getListView().setOnTouchListener(new OnSwipeTouchListener(OptionsActivity.this) {
-            @Override
-            public void onSwipeRight() {
-                Log.e("debug", "Swiped Left!");
-                finish();
-                //   Call.Details.this.overridePendingTransition(R.anim.nothing, R.anim.nothing);
-            }
-        });
     }
 
     /**
