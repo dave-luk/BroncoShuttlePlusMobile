@@ -12,14 +12,22 @@ public class Location {
     public int getPlaceID() {
         return placeID;
     }
+
     public double getLat() {
         return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
     public double getLng() {
         return lng;
     }
 
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
     public LatLng parseLatLng() {
         return new LatLng(getLat(), getLng());
     }
@@ -28,4 +36,6 @@ public class Location {
     public String toString() {
         return "Lat: " + lat + "\nlng: " + lng + "\n";
     }
+
+
 }

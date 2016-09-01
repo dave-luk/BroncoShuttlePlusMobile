@@ -45,7 +45,7 @@
         <item>black</item>
     </string-array>
 
-    <string name="main_menu_copyright">© 2015. Dave Luk</string>
+    <string name="main_menu_copyright">© 2015-2016. Dave Luk</string>
     <string name="main_menu_options_caption">Options</string>
     <string name="main_menu_nav_caption">Navigation</string>
     <string name="main_menu_details_caption">Details</string>
@@ -60,4 +60,9 @@
     <string name="title_activity_live_maps">Live Maps</string>
     <string name="shuttle_route">Shuttle Route</string>
     <string name="search_name">Search</string>
+    <string name="nearest_stop">Nearest Stop</string>
+    <string name="dialog_nearest_dismiss">Dismiss</string>
+    <string name="dialog_nearst_title">Nearest Stops</string>
+    <string name="nearest_stops">Nearest Stops</string>
+    <string name="too_far_text">You are far far away! :(</string>
 </resources>
