@@ -22,7 +22,7 @@
             android:id="@+id/liveMap_bottom_drawer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#111" />
+            android:background="@android:color/transparent" />
     </LinearLayout>
 
     <LinearLayout
@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="10"
-            android:background="@android:color/white"
+            android:background="@color/colorLightBg"
             android:orientation="horizontal">
 
             <ImageView
@@ -51,7 +51,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="75"
                 android:paddingTop="15dp"
-                android:text="Shuttle Route"
+                android:text="@string/shuttle_route"
                 android:textColor="@color/black"
                 android:textSize="25sp" />
         </LinearLayout>

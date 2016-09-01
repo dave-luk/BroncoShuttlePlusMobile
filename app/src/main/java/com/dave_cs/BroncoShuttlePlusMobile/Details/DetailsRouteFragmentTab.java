@@ -32,11 +32,14 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by David on 1/20/2016.
  */
-public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
+public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment implements Filterable {
 
     private final ArrayList<String> routes = new ArrayList<>();
     private SwipeRefreshLayout swipeRefreshLayout;
     private ArrayList<SimpleRouteInfo> listItems = new ArrayList<>();
+    private ArrayList<SimpleRouteInfo> searchList = new ArrayList<>();
+    private ListView listView;
+
     private SimpleRouteInfoAdapter adapter;
     private Handler uiCallback = new Handler() {
         public void handleMessage(Message msg) {
@@ -72,7 +75,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
 
         adapter = new SimpleRouteInfoAdapter(this.getContext(), listItems);
 
-        final ListView listView = (ListView) v.findViewById(R.id.routeList);
+        listView = (ListView) v.findViewById(R.id.routeList);
         listView.setAdapter(adapter);
         listView.setItemsCanFocus(true);
 
@@ -173,5 +176,21 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment {
             };
             timer.start();
         }
+    }
+
+    @Override
+    public void filter(String query) {
+        Log.d("<QUERY>: ", "Query is: " + query);
+        searchList.clear();
+        for (SimpleRouteInfo s : listItems)
+            if (s.getRouteName().toLowerCase().contains(query.toLowerCase()))
+                searchList.add(s);
+        SimpleRouteInfoAdapter searchAdapter = new SimpleRouteInfoAdapter(getContext(), searchList);
+        listView.setAdapter(searchAdapter);
+    }
+
+    @Override
+    public void clear() {
+        listView.setAdapter(adapter);
     }
 }

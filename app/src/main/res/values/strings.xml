@@ -58,4 +58,6 @@
     <string name="details_adv_route_stops_text">Route Stops</string>
     <string name="menu_wip">Work in progress!</string>
     <string name="title_activity_live_maps">Live Maps</string>
+    <string name="shuttle_route">Shuttle Route</string>
+    <string name="search_name">Search</string>
 </resources>

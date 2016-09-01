@@ -67,4 +67,5 @@ public class StopInfoFastScrollAdapter extends StopInfoAdapter implements Sectio
     public List<StopInfo> getList() {
         return super.list;
     }
+
 }

@@ -29,7 +29,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by David on 1/20/2016.
  */
-public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
+public class DetailsBusFragmentTab extends android.support.v4.app.Fragment implements Filterable {
 
     private final ArrayList<String> routes = new ArrayList<>();
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -164,6 +164,16 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment {
                 }
             });
         }
+    }
+
+    @Override
+    public void filter(String query) {
+        //do nothing
+    }
+
+    @Override
+    public void clear() {
+        //do nothing
     }
 }
 

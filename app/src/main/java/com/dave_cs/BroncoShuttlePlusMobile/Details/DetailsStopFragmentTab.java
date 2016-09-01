@@ -29,11 +29,12 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by David on 1/20/2016.
  */
-public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
+public class DetailsStopFragmentTab extends android.support.v4.app.Fragment implements Filterable {
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
     private List<StopInfo> stopInfoList = new ArrayList<>();
+    private List<StopInfo> searchList = new ArrayList<>();
 
     private ListView stopListView;
     private StopInfoFastScrollAdapter listAdapter;
@@ -71,8 +72,8 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getActivity(), DetailsAdvActivity.class);
-                intent.putExtra("stopName", stopInfoList.get(position).getName());
-                intent.putExtra("stopNumber", stopInfoList.get(position).getStopNumber());
+                intent.putExtra("stopName", ((StopInfo) stopListView.getItemAtPosition(position)).getName());
+                intent.putExtra("stopNumber", ((StopInfo) stopListView.getItemAtPosition(position)).getStopNumber());
                 startActivity(intent);
             }
         });
@@ -97,7 +98,8 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
             public void onResponse(Call<List<StopInfo>> call, Response<List<StopInfo>> response) {
                 Log.d("<data>", "size:" + stopInfoList.size());
                 if (response.isSuccess()) {
-                    listAdapter.addAll(response.body());
+                    stopInfoList.addAll(response.body());
+                    Log.d("<DATA", "added stop to List: " + stopInfoList.size());
                     Collections.sort(listAdapter.getList());
                     listAdapter.notifyDataSetChanged();
                     listAdapter.initialize();
@@ -116,4 +118,21 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment {
         });
     }
 
+    @Override
+    public void filter(String query) {
+        searchList.clear();
+        for (StopInfo s : stopInfoList) {
+            Log.d("<Iteration>: ", s.getName());
+            if (s.getName().toLowerCase().contains(query.toLowerCase()))
+                searchList.add(s);
+        }
+
+        StopInfoFastScrollAdapter searchAdapter = new StopInfoFastScrollAdapter(getContext(), searchList);
+        stopListView.setAdapter(searchAdapter);
+    }
+
+    @Override
+    public void clear() {
+        stopListView.setAdapter(listAdapter);
+    }
 }

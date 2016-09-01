@@ -54,6 +54,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private final ArrayList<String> routes = new ArrayList<>();
+    private final ArrayList<String> routeNames = new ArrayList<>();
+    private ArrayAdapter<String> adapter;
     private GoogleMap mMap;
     private int polyReady, stopsReady, busReady;
     private ArrayList<ArrayList<LatLng>> masterPolyList = new ArrayList<>();
@@ -75,7 +77,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     private DrawerLayout drawerLayout;
     private ListView leftDrawer;
-    private FrameLayout bottomDrawer;
+    private FrameLayout rightDrawer;
 
     private LinearLayout linearLayout;
     private LinearLayout innerLayout;
@@ -112,12 +114,15 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         drawerLayout = (DrawerLayout) findViewById(R.id.liveMap_drawer_layout);
         leftDrawer = (ListView) findViewById(R.id.liveMap_left_drawer);
-        bottomDrawer = (FrameLayout) findViewById(R.id.liveMap_bottom_drawer);
+        rightDrawer = (FrameLayout) findViewById(R.id.liveMap_bottom_drawer);
 
+        //setting the initial right drawer closed
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
     }
 
     private void finalizeList() {
-        leftDrawer.setAdapter(new ArrayAdapter<>(this, R.layout.item_live_map_drawer_item, R.id.item_liveMap_drawer_item, routes));
+        adapter = new ArrayAdapter<>(this, R.layout.item_live_map_drawer_item, R.id.item_liveMap_drawer_item, routeNames);
+        leftDrawer.setAdapter(adapter);
         leftDrawer.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -141,6 +146,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
                 Log.d("<ROUTE_HEAD>", Arrays.asList(response.body()).toString());
                 if (response.isSuccess()) {
                     routes.addAll(Arrays.asList(response.body()));
+                    routesToName();
                     for (String s : routes) {
                         masterPolyList.add(new ArrayList<LatLng>());
                         masterStopList.add(new ArrayList<StopInfo>());
@@ -459,7 +465,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         Log.d("<data>", "" + data[0] + "|" + data[1] + "|" + data[2]);
         //main box
         linearLayout = new LinearLayout(this);
-        linearLayout.setBackgroundColor(Color.WHITE);
+        linearLayout.setBackgroundColor(Color.DKGRAY);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
@@ -472,7 +478,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         //horizontal box
         LinearLayout horiz = new LinearLayout(this);
-        horiz.setBackgroundColor(Color.BLACK);
+        horiz.setBackgroundColor(Color.parseColor("#b4cfb5"));
         horiz.setOrientation(LinearLayout.HORIZONTAL);
         horiz.setWeightSum(100f);
 
@@ -499,7 +505,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         TextView title = new TextView(this);
         title.setText(m.getTitle());
         title.setTextColor(Color.WHITE);
-        title.setBackgroundColor(Color.BLACK);
+        title.setBackgroundColor(Color.TRANSPARENT);
         title.setSingleLine(false);
         title.setGravity(Gravity.CENTER_VERTICAL);
         title.setTextSize(24);
@@ -517,6 +523,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         horiz.addView(title);
 
         innerLayout = new LinearLayout(this);
+        innerLayout.setBackgroundColor(Color.WHITE);
         innerLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
         frameParams.weight = 80f;
@@ -621,6 +628,35 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         linearLayout.removeAllViews();
     }
 
+    private void routesToName() {
+        for (String r : routes) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("http://dave-cs.com")
+                    .addConverterFactory(JacksonConverterFactory.create())
+                    .build();
+
+            RouteOnlineService routeOnlineService = retrofit.create(RouteOnlineService.class);
+            Call<String[]> data = routeOnlineService.getInfo("");
+
+            Log.d("<REQ>: ", "" + r + " | " + data.request().toString());
+
+            data.enqueue(new Callback<String[]>() {
+                @Override
+                public void onResponse(Call<String[]> call, Response<String[]> response) {
+                    Log.d("<Name>: ", "added route: " + response.body().toString());
+                    routeNames.addAll(Arrays.asList(response.body()));
+                    if (adapter != null)
+                        adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onFailure(Call<String[]> call, Throwable t) {
+                    Log.e("<FAIL-ROUTE-NAME>", t.getLocalizedMessage() + "");
+                }
+            });
+        }
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -640,14 +676,16 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                bottomDrawer.removeAllViews();
+                rightDrawer.removeAllViews();
                 drawerLayout.closeDrawers();
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
             }
         });
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                bottomDrawer.addView(createInfo(marker));
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END);
+                rightDrawer.addView(createInfo(marker));
                 drawerLayout.openDrawer(GravityCompat.END);
                 return true;
             }
