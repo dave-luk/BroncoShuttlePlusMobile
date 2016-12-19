@@ -31,25 +31,27 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public class DetailsBusFragmentTab extends android.support.v4.app.Fragment implements Filterable {
 
-    private final ArrayList<String> routes = new ArrayList<>();
+    private static final String TAG = "DetailsBusFragmentTab";
+
+    private ArrayList<String> routes = new ArrayList<>();
     private SwipeRefreshLayout swipeRefreshLayout;
     private ArrayList<ArrayList<BusInfo>> masterList = new ArrayList<>();
 
     private busViewExpandableListViewAdapter listAdapter;
     private ExpandableListView expandableListView;
-    private ArrayList<String> headers = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        propagateHeaders();
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.details_bus_fragment_layout, container, false);
+        routes = new ArrayList<>();
+        masterList = new ArrayList<>();
+        propagateHeaders();
 
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.busList_refresh_widget);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
@@ -63,6 +65,7 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment imple
         });
 
         expandableListView = (ExpandableListView) v.findViewById(R.id.busList);
+
         expandableListView.setItemsCanFocus(true);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
@@ -78,28 +81,18 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment imple
             }
         });
 
-
         return v;
     }
 
     private void setUpList() {
-        headers = new ArrayList<>();
-        headers = routes;
-        Log.d("<LIST>", "List size is : " + headers.size());
-        for (String s : headers)
+        Log.i(TAG, "List size is : " + routes.size());
+        for (String route : routes) {
             masterList.add(new ArrayList<BusInfo>());
-        Log.d("<LIST>", "MASTER List size is : " + masterList.size());
-        propagateBuses();
-    }
-
-    private void finalizeList() {
-        Log.e("<List>", "finalized");
-        listAdapter = new busViewExpandableListViewAdapter(getContext(), headers, masterList);
-
-        expandableListView.setAdapter(listAdapter);
-        for (int i = 0; i < listAdapter.getGroupCount(); i++) {
-            expandableListView.expandGroup(i);
+            propagateBuses(route);
         }
+        listAdapter = new busViewExpandableListViewAdapter(getContext(), routes, masterList);
+        expandableListView.setAdapter(listAdapter);
+        Log.i(TAG, "MASTER List size is : " + masterList.size());
     }
 
     private void propagateHeaders() {
@@ -113,7 +106,7 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment imple
         data.enqueue(new Callback<String[]>() {
             @Override
             public void onResponse(Call<String[]> call, Response<String[]> response) {
-                Log.d("<ROUTE_HEAD>", Arrays.asList(response.body()).toString());
+                Log.i(TAG, "route header" + Arrays.asList(response.body()).toString());
                 if (response.isSuccess()) {
                     routes.addAll(Arrays.asList(response.body()));
                     setUpList();
@@ -122,48 +115,44 @@ public class DetailsBusFragmentTab extends android.support.v4.app.Fragment imple
 
             @Override
             public void onFailure(Call<String[]> call, Throwable t) {
-                Log.e("<FAIL-ROUTE>", t.getLocalizedMessage() + "");
+                Log.e(TAG, "route-header-fail" + t.getLocalizedMessage());
             }
         });
     }
 
-    private void propagateBuses() {
+    private void propagateBuses(final String route) {
         // reach to server and pull route info
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://dave-cs.com")
-                    .addConverterFactory(JacksonConverterFactory.create())
-                    .build();
-        for (final String str : routes) {
-
-            BusListService busListService = retrofit.create(BusListService.class);
-
-            Call<List<BusInfo>> call = busListService.getInfo(str.replace("ROUTE ", ""));
-            call.enqueue(new Callback<List<BusInfo>>() {
-
-                @Override
-                public void onResponse(Call<List<BusInfo>> call, Response<List<BusInfo>> response) {
-                    if (response.isSuccess()) {
-                        masterList.get(headers.indexOf(str)).addAll(response.body());
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://dave-cs.com")
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
 
 
-                        if (headers.indexOf(str) == headers.size() - 1) {
-                            Log.d("<DEBUG>", "last reached");
-                            finalizeList();
-                            listAdapter.notifyDataSetChanged();
-                        }
-                    } else {
-                        Log.e("<Error>", response.code() + ":" + response.message());
-                        }
-                    if (swipeRefreshLayout != null)
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
+        BusListService busListService = retrofit.create(BusListService.class);
 
-                @Override
-                public void onFailure(Call<List<BusInfo>> call, Throwable t) {
-                    Log.e("<Error>", t.getLocalizedMessage() + "");
+        Call<List<BusInfo>> call = busListService.getInfo(route.replace("ROUTE ", ""));
+        call.enqueue(new Callback<List<BusInfo>>() {
+            @Override
+            public void onResponse(Call<List<BusInfo>> call, Response<List<BusInfo>> response) {
+                if (response.isSuccess()) {
+                    int index = routes.indexOf(route);
+                    masterList.get(index).addAll(response.body());
+                    listAdapter.notifyDataSetChanged();
+                    expandableListView.expandGroup(index);
+
+                } else {
+                    Log.e(TAG, response.code() + ":" + response.message());
                 }
-            });
-        }
+                if (swipeRefreshLayout != null)
+                    swipeRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(Call<List<BusInfo>> call, Throwable t) {
+                Log.e(TAG, "bus-fail" + t.getLocalizedMessage());
+            }
+        });
+
     }
 
     @Override

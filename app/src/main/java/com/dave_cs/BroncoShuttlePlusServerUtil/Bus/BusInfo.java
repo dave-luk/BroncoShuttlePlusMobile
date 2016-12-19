@@ -1,11 +1,25 @@
 package com.dave_cs.BroncoShuttlePlusServerUtil.Bus;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class BusInfo implements Comparable
+public class BusInfo implements Comparable, Parcelable
 {
+    public static final Creator<BusInfo> CREATOR = new Creator<BusInfo>() {
+        @Override
+        public BusInfo createFromParcel(Parcel in) {
+            return new BusInfo(in);
+        }
+
+        @Override
+        public BusInfo[] newArray(int size) {
+            return new BusInfo[size];
+        }
+    };
     private String busName;
     private String route;
     private int fullness;
@@ -30,6 +44,7 @@ public class BusInfo implements Comparable
         }
     }
 
+
     public BusInfo()
     {
         this.busName = "Unavailable!";
@@ -40,6 +55,14 @@ public class BusInfo implements Comparable
         this.busNumber = 0;
     }
 
+    protected BusInfo(Parcel in) {
+        busName = in.readString();
+        route = in.readString();
+        fullness = in.readInt();
+        lastUpdate = in.readInt();
+        nextStop = in.readString();
+        busNumber = in.readInt();
+    }
 
     public String getBusName() {
         return busName;
@@ -74,5 +97,19 @@ public class BusInfo implements Comparable
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(busName);
+        dest.writeString(route);
+        dest.writeInt(fullness);
+        dest.writeInt(lastUpdate);
+        dest.writeString(nextStop);
+        dest.writeInt(busNumber);
+    }
 }
 

@@ -15,8 +15,8 @@ android {
         applicationId "com.dave_cs.myapplication"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 6
-        versionName "1.1e"
+        versionCode 8
+        versionName "2.1"
     }
     buildTypes {
         release {
@@ -34,7 +34,7 @@ android {
         exclude 'META-INF/NOTICE.txt'
     }
     dexOptions {
-        javaMaxHeapSize "12g"
+        javaMaxHeapSize "8g"
         preDexLibraries = false
     }
 }

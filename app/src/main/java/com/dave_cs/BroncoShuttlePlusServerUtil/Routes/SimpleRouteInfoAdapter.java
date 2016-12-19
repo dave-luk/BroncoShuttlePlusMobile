@@ -33,7 +33,6 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
             convertView = inflater.inflate(R.layout.item_route_item, parent, false);
             viewHolder.mainBox = (LinearLayout) convertView.findViewById(R.id.item_route_box);
             viewHolder.routeName = (TextView) convertView.findViewById(R.id.item_route_name);
-            viewHolder.routeHours = (TextView) convertView.findViewById(R.id.item_route_hours);
             viewHolder.busCount = (TextView) convertView.findViewById(R.id.item_route_bus);
             convertView.setTag(viewHolder);
         } else {
@@ -45,13 +44,8 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
         viewHolder.mainBox.setBackgroundColor(bg);
 
         viewHolder.routeName.setText(simpleRouteInfo.getRouteName());
-        viewHolder.routeHours.setText(simpleRouteInfo.getRouteHours());
-        if (simpleRouteInfo.getRouteHours().equals("OUT OF SERVICE") || !simpleRouteInfo.isInService()) {
-            viewHolder.busCount.setText("");
-        }
-        else{
-            viewHolder.busCount.setText("Bus on route: " + simpleRouteInfo.getBusCount());
-        }
+
+        viewHolder.busCount.setText("Bus on route: " + simpleRouteInfo.getBusCount());
         // Return the completed view to render on screen
         return convertView;
     }
@@ -60,7 +54,6 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
     private static class ViewHolder {
         LinearLayout mainBox;
         TextView routeName;
-        TextView routeHours;
         TextView busCount;
     }
 }

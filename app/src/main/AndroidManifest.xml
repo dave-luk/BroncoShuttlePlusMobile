@@ -84,7 +84,8 @@
         -->
         <activity
             android:name=".LiveMaps.LiveMapsActivity"
-            android:label="@string/title_activity_live_maps">
+            android:label="@string/title_activity_live_maps"
+            android:launchMode="singleInstance">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.dave_cs.BroncoShuttlePlusMobile.MainMenuActivity" />

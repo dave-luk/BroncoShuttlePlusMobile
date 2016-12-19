@@ -1,13 +1,35 @@
 package com.dave_cs.BroncoShuttlePlusServerUtil;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 
 //@JsonIgnoreProperties(ignoreUnknown = true)
-public class Location {
+public class Location implements Parcelable {
+    public static final Creator<Location> CREATOR = new Creator<Location>() {
+        @Override
+        public Location createFromParcel(Parcel in) {
+            return new Location(in);
+        }
+
+        @Override
+        public Location[] newArray(int size) {
+            return new Location[size];
+        }
+    };
     private double lat;
     private double lng;
-
     private int placeID;
+
+    public Location() {
+    }
+
+    protected Location(Parcel in) {
+        lat = in.readDouble();
+        lng = in.readDouble();
+        placeID = in.readInt();
+    }
 
     public int getPlaceID() {
         return placeID;
@@ -38,4 +60,15 @@ public class Location {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(lat);
+        dest.writeDouble(lng);
+        dest.writeInt(placeID);
+    }
 }

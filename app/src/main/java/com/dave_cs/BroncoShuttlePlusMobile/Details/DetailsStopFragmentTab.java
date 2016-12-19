@@ -22,7 +22,10 @@ import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopLocation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,6 +36,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  * Created by David on 1/20/2016.
  */
 public class DetailsStopFragmentTab extends android.support.v4.app.Fragment implements Filterable {
+
+    private static final String TAG = "DetailsStopFragmentTab";
 
     public boolean ready = false;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -86,9 +91,17 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
 
     private void propagate()
     {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .addInterceptor(logging)
+                .build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://dave-cs.com")
+                .client(client)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
@@ -99,17 +112,17 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
 
             @Override
             public void onResponse(Call<List<StopInfo>> call, Response<List<StopInfo>> response) {
-                Log.d("<data>", "size:" + stopInfoList.size());
+                Log.i(TAG, "size:" + stopInfoList.size());
                 if (response.isSuccess()) {
                     stopInfoList.addAll(response.body());
-                    Log.d("<DATA", "added stop to List: " + stopInfoList.size());
+                    Log.i(TAG, "added stop to List: " + stopInfoList.size());
                     Collections.sort(listAdapter.getList());
                     listAdapter.notifyDataSetChanged();
                     listAdapter.initialize();
                     ready = true;
-                    Log.d("<data>", "size:" + stopInfoList.size());
+                    Log.i(TAG, "size:" + stopInfoList.size());
                 } else {
-                    Log.e("<Error>", response.code() + ":" + response.message());
+                    Log.e(TAG, response.code() + ":-" + response.message());
                 }
                 if (swipeRefreshLayout != null)
                     swipeRefreshLayout.setRefreshing(false);
@@ -117,7 +130,7 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
 
             @Override
             public void onFailure(Call<List<StopInfo>> call, Throwable t) {
-                Log.e("<FAIL>", t.getLocalizedMessage() + " ");
+                Log.e(TAG, "Failed: " + t.getLocalizedMessage());
             }
         });
     }
@@ -126,7 +139,6 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
     public void filter(String query) {
         searchList.clear();
         for (StopInfo s : stopInfoList) {
-            Log.d("<Iteration>: ", s.getName());
             if (s.getName().toLowerCase().contains(query.toLowerCase()))
                 searchList.add(s);
         }
@@ -164,17 +176,18 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
                         Location l = response.body();
                         stopLocations.add(new StopLocation(s.getName(), s.getStopNumber(), l));
                     } else {
-                        Log.e("<Error>", response.code() + ":" + response.message());
+                        Log.e(TAG, response.code() + ":" + response.message());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Location> call, Throwable t) {
-                    Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
+                    Log.e(TAG, t.getLocalizedMessage() + "::" + call.toString());
                 }
             });
         }
 
         return stopLocations;
     }
+
 }

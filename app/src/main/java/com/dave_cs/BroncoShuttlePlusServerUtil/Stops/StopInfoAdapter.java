@@ -48,9 +48,9 @@ public class StopInfoAdapter extends ArrayAdapter<StopInfo> {
         viewHolder.stopName.setText(stopInfo.getName());
         int timeToNext = stopInfo.getTimeToNext();
         String nextBus, nextTime;
-        if (timeToNext < 0) {
+        if (timeToNext == -9001) {
             nextBus = "OUT OF SERVICE";
-            nextTime = "";
+            nextTime = "No Predictions";
         } else {
             nextBus = stopInfo.getNextBusOfRoute() + " bus in";
             nextTime = Integer.toString(timeToNext) + " s";

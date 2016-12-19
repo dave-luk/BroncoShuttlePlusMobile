@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_pane"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/green"
@@ -10,30 +11,29 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.dave_cs.broncoshuttleplus.MainMenuActivity"
-    tools:showIn="@layout/activity_main"
-    android:id="@+id/main_pane">
+    tools:context="com.dave_cs.BroncoShuttlePlusMobile.MainMenuActivity"
+    tools:showIn="@layout/activity_main">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.3">
+            android:layout_weight="0.3"
+            android:orientation="horizontal">
 
             <ImageButton
+                android:id="@+id/main_logo"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:id="@+id/main_logo"
-                android:src="@drawable/ic_bronco_shuttle"
-                android:scaleType="fitCenter"
                 android:background="#00ffffff"
+                android:contentDescription="@string/main_menu_main_logo_caption"
                 android:longClickable="true"
-                android:contentDescription="@string/main_menu_main_logo_caption" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_bronco_shuttle" />
         </LinearLayout>
 
         <RelativeLayout
@@ -42,93 +42,93 @@
             android:layout_weight="0.7">
 
             <TextClock
+                android:id="@+id/textClock"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/textClock" />
+                android:layout_height="wrap_content" />
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:id="@+id/linearLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/CenterVStrut"
                 android:layout_centerHorizontal="true"
-                android:id="@+id/linearLayout">
+                android:orientation="horizontal">
 
                 <ImageButton
-                    android:scaleType="fitXY"
-                    android:background="@android:color/transparent"
+                    android:id="@+id/liveMap_ImageButton"
                     android:layout_width="125dp"
                     android:layout_height="125dp"
-                    android:id="@+id/liveMapImageButton"
-                    android:src="@drawable/load_live_map"
-                    android:contentDescription="@string/main_menu_liveMap_caption" />
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/main_menu_liveMap_caption"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/load_live_map" />
 
                 <ImageButton
-                    android:scaleType="fitXY"
-                    android:background="@android:color/transparent"
+                    android:id="@+id/detailsView_ImageButton"
                     android:layout_width="125dp"
                     android:layout_height="125dp"
-                    android:id="@+id/detailsViewImageButton"
-                    android:src="@drawable/load_details"
-                    android:contentDescription="@string/main_menu_details_caption" />
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/main_menu_details_caption"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/load_details" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:id="@+id/CenterVStrut"
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
-                android:id="@+id/CenterVStrut"
-                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true">
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
 
             </LinearLayout>
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/CenterVStrut"
                 android:layout_alignLeft="@+id/linearLayout"
-                android:layout_alignStart="@+id/linearLayout">
+                android:layout_alignStart="@+id/linearLayout"
+                android:layout_below="@+id/CenterVStrut"
+                android:orientation="horizontal">
 
                 <ImageButton
-                    android:scaleType="fitXY"
-                    android:background="@android:color/transparent"
+                    android:id="@+id/navigation_ImageButton"
                     android:layout_width="125dp"
                     android:layout_height="125dp"
-                    android:id="@+id/navigationImageButton"
-                    android:src="@drawable/ic_navigation_icon"
-                    android:contentDescription="@string/main_menu_nav_caption" />
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/main_menu_nav_caption"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_navigation_icon" />
 
                 <ImageButton
-                    android:scaleType="fitXY"
-                    android:background="@android:color/transparent"
+                    android:id="@+id/options_ImageButton"
                     android:layout_width="125dp"
                     android:layout_height="125dp"
-                    android:id="@+id/optionsImageButton"
-                    android:src="@drawable/ic_options_icon"
-                    android:contentDescription="@string/main_menu_options_caption" />
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/main_menu_options_caption"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ic_options_icon" />
             </LinearLayout>
 
             <TextView
+                android:id="@+id/copyRight_TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/main_menu_copyright"
-                android:id="@+id/textView"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:textColor="#ffffff"
+                android:text="@string/main_menu_copyright"
+                android:textColor="@android:color/white"
                 android:textIsSelectable="false" />
 
             <LinearLayout
-                android:orientation="vertical"
+                android:id="@+id/CenterHStrut"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:id="@+id/CenterHStrut"></LinearLayout>
+                android:orientation="vertical"></LinearLayout>
 
         </RelativeLayout>
 

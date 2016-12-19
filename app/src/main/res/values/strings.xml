@@ -45,7 +45,7 @@
         <item>black</item>
     </string-array>
 
-    <string name="main_menu_copyright">© 2015-2016. Dave Luk</string>
+    <string name="main_menu_copyright">version. %s © 2015–2017. Dave Luk</string>
     <string name="main_menu_options_caption">Options</string>
     <string name="main_menu_nav_caption">Navigation</string>
     <string name="main_menu_details_caption">Details</string>

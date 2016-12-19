@@ -2,8 +2,6 @@ package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,6 +32,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment implements Filterable {
 
+    private static final String TAG = "DetailsRouteFragmentTab";
+
     private final ArrayList<String> routes = new ArrayList<>();
     private SwipeRefreshLayout swipeRefreshLayout;
     private ArrayList<SimpleRouteInfo> listItems = new ArrayList<>();
@@ -41,19 +41,12 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment imp
     private ListView listView;
 
     private SimpleRouteInfoAdapter adapter;
-    private Handler uiCallback = new Handler() {
-        public void handleMessage(Message msg) {
-            if (!routes.isEmpty() && listItems.isEmpty())
-                propagateRoutes();
-        }
-    };
 
     @Override
     @SuppressWarnings("Unchecked")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         propagateHeaders();
-        propagateRoutes();
     }
 
     @Override
@@ -62,6 +55,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment imp
 
         View v = inflater.inflate(R.layout.details_route_fragment_layout, container, false);
 
+        //set up swipe refresh
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.routeList_refresh_widget);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -69,17 +63,18 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment imp
             public void onRefresh() {
                 adapter.clear();
                 propagateHeaders();
-                propagateRoutes();
             }
         });
 
+        //set up listView
         adapter = new SimpleRouteInfoAdapter(this.getContext(), listItems);
 
         listView = (ListView) v.findViewById(R.id.routeList);
         listView.setAdapter(adapter);
         listView.setItemsCanFocus(true);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        //make item clickable
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -90,6 +85,7 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment imp
                 startActivity(intent);
             }
         });
+
         return v;
     }
 
@@ -104,83 +100,65 @@ public class DetailsRouteFragmentTab extends android.support.v4.app.Fragment imp
         data.enqueue(new Callback<String[]>() {
             @Override
             public void onResponse(Call<String[]> call, Response<String[]> response) {
-                Log.d("<ROUTE_HEAD>", Arrays.asList(response.body()).toString());
+                Log.i(TAG, "route head: " + Arrays.asList(response.body()).toString());
                 if (response.isSuccess()) {
                     routes.addAll(Arrays.asList(response.body()));
+                    for (String route : routes) {
+                        propagateRoutes(route);
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<String[]> call, Throwable t) {
-                Log.e("<FAIL-ROUTE>", t.getLocalizedMessage() + "");
+                Log.e(TAG, "route-head-fail: " + t.getLocalizedMessage());
             }
         });
     }
 
-    private void propagateRoutes(){
+    private void propagateRoutes(String route) {
         // reach to server and pull route info
-        if (!routes.isEmpty()) {
-            Log.d("<Route-prop", "Not empty!");
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://dave-cs.com")
-                    .addConverterFactory(JacksonConverterFactory.create())
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://dave-cs.com")
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
 
-            for (String str : routes) {
-                SimpleRouteInfoService simpleRouteInfoService = retrofit.create(SimpleRouteInfoService.class);
-                Call<SimpleRouteInfo> call = simpleRouteInfoService.getInfo(str.replace("ROUTE ", ""));
-                call.enqueue(new Callback<SimpleRouteInfo>() {
+        SimpleRouteInfoService simpleRouteInfoService = retrofit.create(SimpleRouteInfoService.class);
+        Call<SimpleRouteInfo> call = simpleRouteInfoService.getInfo(route.replace("ROUTE ", ""));
+        call.enqueue(new Callback<SimpleRouteInfo>() {
 
-                    @Override
-                    public void onResponse(Call<SimpleRouteInfo> call, Response<SimpleRouteInfo> response) {
-                        if (response.isSuccess()) {
-                            boolean added = false;
-                            for (SimpleRouteInfo s : listItems)
-                            {
-                                if (s.compareTo(response.body()) == 0) {
-                                    added = true;
-                                }
-
-                            }
-                            if (!added)
-                                listItems.add(response.body());
-
-                            Collections.sort(listItems);
-                            adapter.notifyDataSetChanged();
-                        } else {
-                            Log.e("<Error>", response.code() + ":" + response.message());
+            @Override
+            public void onResponse(Call<SimpleRouteInfo> call, Response<SimpleRouteInfo> response) {
+                if (response.isSuccess()) {
+                    boolean added = false;
+                    for (SimpleRouteInfo s : listItems) {
+                        if (s.compareTo(response.body()) == 0) {
+                            added = true;
                         }
-                        if (swipeRefreshLayout != null)
-                            swipeRefreshLayout.setRefreshing(false);
-                    }
 
-                    @Override
-                    public void onFailure(Call<SimpleRouteInfo> call, Throwable t) {
-                        Log.e("<FAIL-ROUTE>", t.getLocalizedMessage() + "");
                     }
-                });
-            }
-        } else {
-            Thread timer = new Thread() {
-                public void run() {
-                    for (; ; ) {
-                        // do stuff in a separate thread
-                        uiCallback.sendEmptyMessage(0);
-                        try {
-                            Thread.sleep(1000);    // sleep for 3 seconds
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    if (!added)
+                        listItems.add(response.body());
+
+                    Collections.sort(listItems);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Log.e(TAG, "error: " + response.code() + ":" + response.message());
                 }
-            };
-            timer.start();
-        }
+                if (swipeRefreshLayout != null)
+                    swipeRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(Call<SimpleRouteInfo> call, Throwable t) {
+                Log.e(TAG, "route-fail: " + t.getLocalizedMessage());
+            }
+        });
     }
 
     @Override
     public void filter(String query) {
-        Log.d("<QUERY>: ", "Query is: " + query);
+        Log.i(TAG, "Query is: " + query);
         searchList.clear();
         for (SimpleRouteInfo s : listItems)
             if (s.getRouteName().toLowerCase().contains(query.toLowerCase()))

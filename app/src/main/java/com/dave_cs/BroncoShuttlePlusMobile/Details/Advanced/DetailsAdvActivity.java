@@ -4,9 +4,9 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -33,6 +33,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -46,56 +48,48 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-
+    private static final String TAG = "DetailsAdvActivity";
+    @Bind(R.id.refocus_icon)
+    protected ImageButton recenter;
+    @Bind(R.id.details_frag_holder)
+    protected FrameLayout detailsInfo;
     private FragmentManager fm = getSupportFragmentManager();
     private SupportMapFragment mapFragment;
     private GoogleMap googleMap;
     private LatLng location = new LatLng(34.056781, -117.821071);
     private Marker currMarker;
-    private ImageButton refocus;
-
-    private FrameLayout detailsInfo;
     private LinearLayout linearLayout;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayout innerLayout;
-
     private Object info;
-
     private String name;
-    private String type;
+    private InfoType type;
     private int id;
+    private Handler updateHandler = new Handler();
+    private Runnable updateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            getInfo();
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_details_adv);
+        ButterKnife.bind(this);
 
-        refocus = (ImageButton) findViewById(R.id.refocus_icon);
-        detailsInfo = (FrameLayout) findViewById(R.id.details_frag_holder);
+        //Set up for info layouts.
+        linearLayout = new LinearLayout(this);
+        linearLayout.setBackgroundColor(Color.WHITE);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        swipeRefreshLayout = new SwipeRefreshLayout(this);
-        swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getInfo();
-            }
-        });
+        LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        linearLayout.setWeightSum(100f);
+        linearLayout.setLayoutParams(linearLayoutParams);
 
-        if (detailsInfo != null) {
-            linearLayout = new LinearLayout(this);
-            linearLayout.setBackgroundColor(Color.WHITE);
-            linearLayout.setOrientation(LinearLayout.VERTICAL);
-
-            LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            linearLayout.setWeightSum(100f);
-            linearLayout.setLayoutParams(linearLayoutParams);
-
-            initInfo();
-        }
-
-        refocus.setOnClickListener(new View.OnClickListener() {
+        //this let user return to marker.
+        recenter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (googleMap != null) {
@@ -104,6 +98,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
             }
         });
 
+        //set up the map fragment
         mapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map_frag);
         if (mapFragment == null) {
             mapFragment = SupportMapFragment.newInstance();
@@ -118,11 +113,11 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
             String busName = getIntent().getExtras().getString("busName");
             if (stopID != 0) {
                 name = stopName;
-                type = "stop";
+                type = InfoType.STOP;
                 id = stopID;
             } else if (busID != 0) {
                 name = busName;
-                type = "bus";
+                type = InfoType.BUS;
                 id = busID;
             }
         } catch (Exception e) {
@@ -131,11 +126,11 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
         getLocation();
         getInfo();
 
+        //TODO: make this nicer
         Toolbar toolbar = (Toolbar) findViewById(R.id.advBar);
         toolbar.setTitle(name);
         setSupportActionBar(toolbar);
     }
-
 
     @Override
     public void onDestroy() {
@@ -152,11 +147,11 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        Log.d("<Maps>", "map ready");
+    public void onMapReady(final GoogleMap googleMap) {
+        Log.i(TAG, "map ready");
         this.googleMap = googleMap;
 
-        Log.d("<Maps>", "got a location. displaying" + location.toString());
+        Log.i(TAG, "got a location. displaying" + location.toString());
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -172,24 +167,27 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
 
         getSupportFragmentManager().beginTransaction().replace(R.id.map_frag, mapFragment).commit();
 
+
+        //This keeps the name on all times.
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
                 currMarker.showInfoWindow();
             }
         });
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                if (!marker.isInfoWindowShown()) {
-                    marker.showInfoWindow();
-                }
-                return true;
-            }
-        });
+        // This disables navigation, we don't want this behavior.
+//        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//            @Override
+//            public boolean onMarkerClick(Marker marker) {
+//                if (!marker.isInfoWindowShown()) {
+//                    marker.showInfoWindow();
+//                }
+//                return true;
+//            }
+//        });
 
         if (mapFragment == null) {
-            Log.d("<Map>", "replacing frag");
+            Log.i(TAG, "replacing frag");
             mapFragment = SupportMapFragment.newInstance();
         }
 
@@ -226,11 +224,11 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
 
         if (info != null) {
             switch (type) {
-                case "stop":
+                case STOP:
                     StopInfo stopInfo = (StopInfo) info;
 
                     TextView routes = new TextView(this);
-                    routes.setText("Routes: " + stopInfo.getOnRoute());
+                    routes.setText(String.format("Routes: %s", stopInfo.getOnRoute()));
                     routes.setTextColor(Color.BLACK);
                     routes.setTextSize(20);
 
@@ -269,11 +267,11 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     innerLayout.addView(nextBus);
                     innerLayout.addView(nextBusTime);
                     break;
-                case "bus":
+                case BUS:
                     BusInfo busInfo = (BusInfo) info;
 
                     TextView busRoute = new TextView(this);
-                    busRoute.setText("Route: " + busInfo.getRoute());
+                    busRoute.setText(String.format("Route: %s", busInfo.getRoute()));
                     busRoute.setTextColor(Color.BLACK);
                     busRoute.setTextSize(20);
 
@@ -298,7 +296,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     fullness.setLayoutParams(fullnessParams);
 
                     TextView nextStop = new TextView(this);
-                    nextStop.setText("Next Stop: " + busInfo.getNextStop());
+                    nextStop.setText(String.format("Next Stop: %s", busInfo.getNextStop()));
                     nextStop.setTextColor(Color.BLACK);
                     nextStop.setTextSize(20);
 
@@ -317,17 +315,13 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
             linearLayout.addView(innerLayout);
 
         }
-        if (swipeRefreshLayout != null)
-            swipeRefreshLayout.setRefreshing(false);
-        swipeRefreshLayout.addView(linearLayout);
-        detailsInfo.addView(swipeRefreshLayout);
 
+        detailsInfo.addView(linearLayout);
     }
 
     private void clearView() {
         innerLayout.removeAllViews();
         linearLayout.removeAllViews();
-        swipeRefreshLayout.removeView(linearLayout);
         detailsInfo.removeAllViews();
     }
 
@@ -346,7 +340,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                 .build();
 
         switch (type) {
-            case "stop":
+            case STOP:
                 StopInfoService stopInfoService = retrofit.create(StopInfoService.class);
 
                 Call<StopInfo> stopCall = stopInfoService.getInfo(Integer.toString(id));
@@ -354,19 +348,21 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     @Override
                     public void onResponse(Call<StopInfo> call, Response<StopInfo> response) {
                         if (response.isSuccess()) {
+                            Log.i(TAG, "get info");
                             info = response.body();
                             initInfo();
+                            updateHandler.postDelayed(updateRunnable, 5000);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<StopInfo> call, Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
+                        Log.e(TAG, "error: " + t.getLocalizedMessage() + "" + call.toString());
                     }
 
                 });
                 break;
-            case "bus":
+            case BUS:
                 BusInfoService busInfoService = retrofit.create(BusInfoService.class);
 
                 Call<BusInfo> busCall = busInfoService.getInfo(Integer.toString(id));
@@ -374,14 +370,16 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     @Override
                     public void onResponse(Call<BusInfo> call, Response<BusInfo> response) {
                         if (response.isSuccess()) {
+                            Log.i(TAG, "get info");
                             info = response.body();
                             initInfo();
+                            updateHandler.postDelayed(updateRunnable, 5000);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<BusInfo> call, Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
+                        Log.e(TAG, "error: " + t.getLocalizedMessage() + "" + call.toString());
                     }
                 });
                 break;
@@ -405,8 +403,8 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
         LocationService locationService = retrofit.create(LocationService.class);
 
         switch (type) {
-            case "stop":
-                Log.d("<Query>", "the stop id passed is: " + id);
+            case STOP:
+                Log.i(TAG, "the stop id passed is: " + id);
                 Call<Location> stopCall = locationService.getLocation(id, null);
                 stopCall.enqueue(new Callback<Location>() {
 
@@ -415,21 +413,21 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                         if (response.isSuccess()) {
                             Location l = response.body();
                             location = new LatLng(l.getLat(), l.getLng());
-                            Log.d("<Location>", "location is:" + location);
+                            Log.i(TAG, "location is:" + location);
                             initMarker();
                         } else {
-                            Log.e("<Error>", response.code() + ":" + response.message());
+                            Log.e(TAG, response.code() + ":" + response.message());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Location> call, Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
+                        Log.e(TAG, "error: " + t.getLocalizedMessage() + "" + call.toString());
                     }
                 });
                 break;
-            case "bus":
-                Log.d("<Query>", "the bus id passed is: " + id);
+            case BUS:
+                Log.i(TAG, "the bus id passed is: " + id);
                 Call<Location> busCall = locationService.getLocation(null, id);
                 busCall.enqueue(new Callback<Location>() {
 
@@ -438,16 +436,16 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                         if (response.isSuccess()) {
                             Location l = response.body();
                             location = new LatLng(l.getLat(), l.getLng());
-                            Log.d("<Location>", "location of bus is:" + l.getLat() + " | " + location);
+                            Log.i(TAG, "location of bus is:" + location);
                             initMarker();
                         } else {
-                            Log.e("<Error>", response.code() + ":" + response.message());
+                            Log.e(TAG, response.code() + ":" + response.message());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Location> call, Throwable t) {
-                        Log.e("<Error>", t.getLocalizedMessage() + "" + call.toString());
+                        Log.e(TAG, "error: " + t.getLocalizedMessage() + "" + call.toString());
                     }
                 });
                 break;
@@ -456,9 +454,9 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
 
     private void initMarker() {
         if (googleMap != null) {
-            Log.d("<Marker>", "Updated marker to: " + location);
+            Log.i(TAG, "Updated marker to: " + location);
             googleMap.clear();
-            currMarker = googleMap.addMarker(new MarkerOptions().position(location).title(name).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon)));
+            currMarker = googleMap.addMarker(new MarkerOptions().position(location).title(name).icon((type.equals(InfoType.BUS)) ? BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon) : BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_stop_icon)));
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16.5f), new GoogleMap.CancelableCallback() {
                 @Override
                 public void onFinish() {
@@ -471,6 +469,16 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
             });
 
         }
+    }
+
+    @Override
+    protected void onPause() {
+        updateHandler.removeCallbacks(updateRunnable);
+        super.onPause();
+    }
+
+    public enum InfoType {
+        BUS, STOP
     }
 }
 

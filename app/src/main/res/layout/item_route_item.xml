@@ -3,6 +3,7 @@
     android:id="@+id/item_route_box"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:minHeight="100dp"
     android:orientation="horizontal">
 
     <ImageView
@@ -10,7 +11,7 @@
         android:layout_height="match_parent"
         android:layout_weight="25"
         android:background="@android:color/transparent"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         android:src="@drawable/ic_live_map_draw_icon" />
 
     <LinearLayout
@@ -25,13 +26,6 @@
             android:layout_height="wrap_content"
             android:text="Route"
             android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <TextView
-            android:id="@+id/item_route_hours"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hours"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/item_route_bus"

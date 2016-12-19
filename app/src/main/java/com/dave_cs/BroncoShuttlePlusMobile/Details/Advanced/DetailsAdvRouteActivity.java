@@ -11,7 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
 
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
@@ -23,6 +22,8 @@ import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,40 +35,41 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public class DetailsAdvRouteActivity extends AppCompatActivity {
 
+    private static final String TAG = "DetailsAdvRouteActivity";
+    //    private TextView textView;
+    @Bind(R.id.expLV)
+    protected ExpandableListView expandableListView;
     private RouteInfo routeInfo;
-
     private List<BusInfo> busInfoList = new ArrayList<>();
-
     private List<StopInfo> stopInfoList = new ArrayList<>();
-
     private SwipeRefreshLayout swipeRefreshLayout;
-
     private AdvRouteViewExpandableListViewAdapter listAdapter;
-    private TextView textView;
-    private ExpandableListView expandableListView;
     private List<String> headers;
 
 
     private String routeName;
-    
+
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_details_adv_route);
+
+        ButterKnife.bind(this);
+
+        setUpList();
+        listAdapter = new AdvRouteViewExpandableListViewAdapter(this, headers, busInfoList, stopInfoList);
+        expandableListView.setAdapter(listAdapter);
 
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        if(networkInfo != null && networkInfo.isConnected()) {
+        if (networkInfo != null && networkInfo.isConnected()) {
             routeName = getIntent().getExtras().getString("routeName");
             propagate();
-        }
-        else {
+        } else {
             busInfoList.add(new BusInfo());
             stopInfoList.add(new StopInfo());
         }
-
-        setContentView(R.layout.activity_details_adv_route);
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.adv_routeList_refresh_widget);
         swipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.gold);
@@ -79,13 +81,11 @@ public class DetailsAdvRouteActivity extends AppCompatActivity {
             }
         });
 
-        expandableListView = (ExpandableListView) findViewById(R.id.expLV);
         expandableListView.setItemsCanFocus(true);
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
-                //android.support.v4.app.Fragment newFrag = new DetailsAdvFragmentTab();
                 Intent intent = new Intent(DetailsAdvRouteActivity.this, DetailsAdvActivity.class);
 
                 switch (groupPosition) {
@@ -104,14 +104,8 @@ public class DetailsAdvRouteActivity extends AppCompatActivity {
                 return true;
             }
         });
-        setUpList();
-        listAdapter = new AdvRouteViewExpandableListViewAdapter(this, headers, busInfoList, stopInfoList);
-        expandableListView.setAdapter(listAdapter);
-        for(int i =0; i < listAdapter.getGroupCount(); i++)
-        {
-            expandableListView.expandGroup(i);
-        }
 
+        //TODO: better actionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.advBar);
         toolbar.setTitle(routeName);
         setSupportActionBar(toolbar);
@@ -131,32 +125,36 @@ public class DetailsAdvRouteActivity extends AppCompatActivity {
                 .build();
 
         RouteInfoService routeInfoService = retrofit.create(RouteInfoService.class);
-            Call<RouteInfo> call = routeInfoService.getInfo(routeName.replace("ROUTE ",""));
-            call.enqueue(new Callback<RouteInfo>() {
+        Call<RouteInfo> call = routeInfoService.getInfo(routeName.replace("ROUTE ", ""));
+        call.enqueue(new Callback<RouteInfo>() {
 
-                @Override
-                public void onResponse(Call<RouteInfo> call, Response<RouteInfo> response) {
-                    if (response.isSuccess()) {
-                        Log.d("<Success>","received data");
-                        routeInfo = response.body();
-                        listAdapter.removeAll();
-                        listAdapter.add(routeInfo.getBusOnRoute());
-                        listAdapter.add(routeInfo.getStopsOnRoute());
-                        listAdapter.notifyDataSetChanged();
-                        Log.d("<data>", "data got and notified");
-                    } else {
-                        Log.d("<Error>", "" + response.code());
+            @Override
+            public void onResponse(Call<RouteInfo> call, Response<RouteInfo> response) {
+                if (response.isSuccess()) {
+                    Log.i(TAG, "received data");
+                    routeInfo = response.body();
+                    listAdapter.removeAll();
+                    listAdapter.add(routeInfo.getBusOnRoute());
+                    listAdapter.add(routeInfo.getStopsOnRoute());
+                    listAdapter.notifyDataSetChanged();
+
+                    for (int i = 0; i < listAdapter.getGroupCount(); i++) {
+                        expandableListView.expandGroup(i);
                     }
-                    if (swipeRefreshLayout != null)
-                        swipeRefreshLayout.setRefreshing(false);
+                } else {
+                    Log.e(TAG, "error: " + response.code());
                 }
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }
 
-                @Override
-                public void onFailure(Call<RouteInfo> call, Throwable t) {
-                    Log.e("<Error>", t.getLocalizedMessage());
-                    Log.i("TEST", listAdapter.getChildrenCount(1) + " " + ((StopInfo)listAdapter.getChild(1, 0)).getName());
-                }
-            });
+            @Override
+            public void onFailure(Call<RouteInfo> call, Throwable t) {
+                Log.e(TAG, "error: " + t.getLocalizedMessage());
+                Log.i(TAG, "test: " + listAdapter.getChildrenCount(1) + " " + ((StopInfo) listAdapter.getChild(1, 0)).getName());
+            }
+        });
     }
 }
 
