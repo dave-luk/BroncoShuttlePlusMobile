@@ -12,7 +12,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -30,7 +29,6 @@ import butterknife.ButterKnife;
 public class MainMenuActivity extends AppCompatActivity {
 
     private static final String TAG = "MainMenuActivity";
-
     @Bind(R.id.liveMap_ImageButton)
     protected ImageButton mLiveMapButton;
     @Bind(R.id.detailsView_ImageButton)
@@ -41,13 +39,14 @@ public class MainMenuActivity extends AppCompatActivity {
     protected ImageButton mOptionsButton;
     @Bind(R.id.copyRight_TextView)
     protected TextView crText;
-
+    @Bind(R.id.splash_screen)
+    android.support.design.widget.CoordinatorLayout splash;
+    @Bind(R.id.main_pane)
+    RelativeLayout mainPane;
     //TODO: review splash screen construction
     private Handler uiCallback = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            final android.support.design.widget.CoordinatorLayout splash = (android.support.design.widget.CoordinatorLayout) findViewById(R.id.splash_screen);
-            RelativeLayout mainPane = (RelativeLayout) findViewById(R.id.main_pane);
 
             mainPane.setAlpha(0f);
             mainPane.setVisibility(View.VISIBLE);
@@ -84,15 +83,20 @@ public class MainMenuActivity extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
-        final android.support.design.widget.CoordinatorLayout splash = (android.support.design.widget.CoordinatorLayout) findViewById(R.id.splash_screen);
 
-        splash.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                uiCallback.sendEmptyMessage(0);
-                return true;
-            }
-        });
+        //TODO: come back to this splash later
+        final android.support.design.widget.CoordinatorLayout splash = (android.support.design.widget.CoordinatorLayout) findViewById(R.id.splash_screen);
+//
+//        splash.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                uiCallback.sendEmptyMessage(0);
+//                return true;
+//            }
+//        });
+        splash.setVisibility(View.GONE);
+        mainPane.setVisibility(View.VISIBLE);
+        setUp();
     }
 
     private void setUp() {
