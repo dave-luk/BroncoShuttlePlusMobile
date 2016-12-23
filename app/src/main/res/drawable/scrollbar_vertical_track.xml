@@ -5,9 +5,9 @@
     <!--<solid android:color="@color/colorPrimaryDark" />-->
 
     <gradient android:angle="270"
-        android:startColor="@android:color/transparent"
-        android:centerColor="@color/lightGray"
+        android:centerColor="@color/darkGray"
         android:endColor="@android:color/transparent"
+        android:startColor="@android:color/transparent"
         android:type="linear"/>
 
     <size android:width="10dp"/>
