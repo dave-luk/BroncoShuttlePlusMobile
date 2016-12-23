@@ -118,6 +118,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
+                android:fontFamily="serif-monospace"
                 android:text="@string/main_menu_copyright"
                 android:textColor="@android:color/white"
                 android:textIsSelectable="false" />

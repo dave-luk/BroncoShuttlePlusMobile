@@ -12,8 +12,6 @@
         android:layout_height="match_parent">
 
         <include layout="@layout/content_main" />
-
-        <include layout="@layout/splash_screen" />
     </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

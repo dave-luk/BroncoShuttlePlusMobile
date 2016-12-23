@@ -2,6 +2,7 @@ package com.dave_cs.BroncoShuttlePlusServerUtil.Routes;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by David on 1/21/2016.
@@ -21,8 +23,9 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
         super(context, R.layout.item_route_item, users);
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         // Get the data item for this position
         SimpleRouteInfo simpleRouteInfo = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
@@ -39,13 +42,15 @@ public class SimpleRouteInfoAdapter extends ArrayAdapter<SimpleRouteInfo> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         // Populate the data into the template view using the data object\
-        int bg = (simpleRouteInfo.isInService()) ? Color.parseColor("#7724AB84") : Color.parseColor("#77851010");
+        int bg = (simpleRouteInfo != null && simpleRouteInfo.isInService()) ? Color.parseColor("#7724AB84") : Color.parseColor("#77851010");
 
         viewHolder.mainBox.setBackgroundColor(bg);
 
-        viewHolder.routeName.setText(simpleRouteInfo.getRouteName());
+        if (simpleRouteInfo != null) {
+            viewHolder.routeName.setText(simpleRouteInfo.getRouteName());
+            viewHolder.busCount.setText(String.format(Locale.getDefault(), "Bus on route: %d", simpleRouteInfo.getBusCount()));
+        }
 
-        viewHolder.busCount.setText("Bus on route: " + simpleRouteInfo.getBusCount());
         // Return the completed view to render on screen
         return convertView;
     }

@@ -10,6 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:padding="2dp"
         android:text="Stop"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -18,6 +20,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
         android:text="next Bus is"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -26,6 +31,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
         android:text="Time"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

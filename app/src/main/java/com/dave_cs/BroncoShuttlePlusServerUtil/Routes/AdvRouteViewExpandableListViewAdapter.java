@@ -2,7 +2,6 @@ package com.dave_cs.BroncoShuttlePlusServerUtil.Routes;
 
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,7 +121,6 @@ public class AdvRouteViewExpandableListViewAdapter extends BaseExpandableListAda
         }
 
         TextView lblListHeader = (TextView) convertView.findViewById(R.id.routelblListHeader);
-        lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);
 
         return convertView;

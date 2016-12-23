@@ -54,8 +54,9 @@
                 android:elegantTextHeight="true"
                 android:enabled="true"
                 android:focusable="false"
+                android:fontFamily="sans-serif-condensed"
                 android:textAlignment="center"
-                android:textColor="#b2ffffff"
+                android:textColor="@android:color/white"
                 android:textColorHighlight="#fffd9d"
                 android:textSize="30sp"
                 android:textStyle="bold" />
@@ -132,6 +133,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
+                android:fontFamily="sans-serif"
                 android:text="@string/main_menu_copyright"
                 android:textColor="#ffffff"
                 android:textIsSelectable="false" />

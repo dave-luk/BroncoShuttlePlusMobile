@@ -3,6 +3,7 @@ package com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
@@ -202,6 +203,14 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    private void applyStyle(TextView view, int resID) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            view.setTextAppearance(resID);
+        } else {
+            view.setTextAppearance(this, resID);
+        }
+    }
+
     private void initInfo() {
 
         TextView title = new TextView(this);
@@ -209,6 +218,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
         title.setTextColor(Color.WHITE);
         title.setBackgroundColor(Color.parseColor("#b4cfb5"));
         title.setSingleLine(true);
+        applyStyle(title, R.style.AppTheme_InfoWindowTitle);
         title.setEllipsize(TextUtils.TruncateAt.END);
         title.setTextSize(24);
 
@@ -230,6 +240,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     TextView routes = new TextView(this);
                     routes.setText(String.format("Routes: %s", stopInfo.getOnRoute()));
                     routes.setTextColor(Color.BLACK);
+                    applyStyle(routes, R.style.AppTheme_InfoWindowContent);
                     routes.setTextSize(20);
 
                     int timeToNext = stopInfo.getTimeToNext();
@@ -249,6 +260,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     TextView nextBus = new TextView(this);
                     nextBus.setText(nextBusStr);
                     nextBus.setTextColor(Color.BLACK);
+                    applyStyle(nextBus, R.style.AppTheme_InfoWindowContent);
                     nextBus.setTextSize(20);
 
                     LinearLayout.LayoutParams nextBusParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -257,6 +269,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     TextView nextBusTime = new TextView(this);
                     nextBusTime.setText(nextTime);
                     nextBusTime.setTextColor(Color.BLACK);
+                    applyStyle(nextBusTime, R.style.AppTheme_InfoWindowContent);
                     nextBusTime.setTextSize(20);
 
                     LinearLayout.LayoutParams nextBusTimeParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -273,6 +286,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     TextView busRoute = new TextView(this);
                     busRoute.setText(String.format("Route: %s", busInfo.getRoute()));
                     busRoute.setTextColor(Color.BLACK);
+                    applyStyle(busRoute, R.style.AppTheme_InfoWindowContent);
                     busRoute.setTextSize(20);
 
                     LinearLayout.LayoutParams busRouteParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -290,6 +304,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     TextView fullness = new TextView(this);
                     fullness.setText(fullnessStr);
                     fullness.setTextColor(Color.BLACK);
+                    applyStyle(fullness, R.style.AppTheme_InfoWindowContent);
                     fullness.setTextSize(20);
 
                     LinearLayout.LayoutParams fullnessParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -298,6 +313,7 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                     TextView nextStop = new TextView(this);
                     nextStop.setText(String.format("Next Stop: %s", busInfo.getNextStop()));
                     nextStop.setTextColor(Color.BLACK);
+                    applyStyle(nextStop, R.style.AppTheme_InfoWindowContent);
                     nextStop.setTextSize(20);
 
                     LinearLayout.LayoutParams nextStopParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);

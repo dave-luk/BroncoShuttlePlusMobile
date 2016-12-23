@@ -10,22 +10,21 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
+import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewStopData;
 import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Location;
 import com.dave_cs.BroncoShuttlePlusServerUtil.LocationService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfoFastScrollAdapter;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopListService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopLocation;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Observable;
+import java.util.Observer;
 
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,9 +34,9 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by David on 1/20/2016.
  */
-public class DetailsStopFragmentTab extends android.support.v4.app.Fragment implements Filterable {
+public class DetailsStopTabFragment extends android.support.v4.app.Fragment implements Filterable, Observer {
 
-    private static final String TAG = "DetailsStopFragmentTab";
+    private static final String TAG = "DetailsStopTabFragment";
 
     public boolean ready = false;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -47,15 +46,17 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
     private ListView stopListView;
     private StopInfoFastScrollAdapter listAdapter;
 
+    private boolean error = false;
+
     @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            propagate();
-        }
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewStopData.addObserver(this);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.details_stop_fragment_layout, container, false);
 
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.stopList_refresh_widget);
@@ -64,9 +65,13 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
             @Override
             public void onRefresh() {
                 listAdapter.clear();
-                propagate();
+                ((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewStopData.requestStopUpdate();
             }
         });
+
+        if (!((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewStopData.stopInfoList.isEmpty()) {
+            stopInfoList = ((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewStopData.stopInfoList;
+        }
 
         listAdapter = new StopInfoFastScrollAdapter(getContext(), stopInfoList);
 
@@ -86,53 +91,11 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
             }
         });
 
+        if (error) {
+            ((ViewPagerDetailsViewActivity) getActivity()).errorBoxLinearLayout.setVisibility(View.VISIBLE);
+        }
+
         return v;
-    }
-
-    private void propagate()
-    {
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
-        OkHttpClient client = new OkHttpClient.Builder()
-                .readTimeout(60, TimeUnit.SECONDS)
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .addInterceptor(logging)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://dave-cs.com")
-                .client(client)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build();
-
-        StopListService stopListService = retrofit.create(StopListService.class);
-
-        Call<List<StopInfo>> call = stopListService.getInfo();
-        call.enqueue(new Callback<List<StopInfo>>() {
-
-            @Override
-            public void onResponse(Call<List<StopInfo>> call, Response<List<StopInfo>> response) {
-                Log.i(TAG, "size:" + stopInfoList.size());
-                if (response.isSuccess()) {
-                    stopInfoList.addAll(response.body());
-                    Log.i(TAG, "added stop to List: " + stopInfoList.size());
-                    Collections.sort(listAdapter.getList());
-                    listAdapter.notifyDataSetChanged();
-                    listAdapter.initialize();
-                    ready = true;
-                    Log.i(TAG, "size:" + stopInfoList.size());
-                } else {
-                    Log.e(TAG, response.code() + ":-" + response.message());
-                }
-                if (swipeRefreshLayout != null)
-                    swipeRefreshLayout.setRefreshing(false);
-            }
-
-            @Override
-            public void onFailure(Call<List<StopInfo>> call, Throwable t) {
-                Log.e(TAG, "Failed: " + t.getLocalizedMessage());
-            }
-        });
     }
 
     @Override
@@ -190,4 +153,28 @@ public class DetailsStopFragmentTab extends android.support.v4.app.Fragment impl
         return stopLocations;
     }
 
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.i(TAG, "updated!");
+        if (observable instanceof DetailsViewStopData) {
+            if (!((DetailsViewStopData) observable).stopInfoList.isEmpty()) {
+                this.stopInfoList = ((DetailsViewStopData) observable).stopInfoList;
+                if (getContext() != null) {
+                    listAdapter = new StopInfoFastScrollAdapter(getContext(), stopInfoList);
+                    listAdapter.initialize();
+                    clear();
+                    ready = true;
+                    if (swipeRefreshLayout != null) {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                    error = false;
+                    if (getActivity() != null) {
+                        ((ViewPagerDetailsViewActivity) getActivity()).errorBoxLinearLayout.setVisibility(View.GONE);
+                    }
+                    Log.i(TAG, "update complete with list");
+                }
+
+            }
+        }
+    }
 }

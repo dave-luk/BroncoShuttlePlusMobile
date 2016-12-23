@@ -8,15 +8,20 @@
         android:id="@+id/item_liveMap_drawer_item_icon"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        android:layout_gravity="center_vertical"
         android:background="@android:color/transparent"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_live_map_draw_icon" />
+        android:src="@drawable/ic_live_map_draw_icon"
+        android:tint="@color/colorPrimaryDark" />
 
     <TextView
         android:id="@+id/item_liveMap_drawer_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:textColor="@android:color/white"
-        android:textSize="20sp" />
+        android:layout_gravity="center_vertical"
+        android:fontFamily="sans-serif-condensed"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        android:textColor="@color/colorPrimaryDark" />
 </LinearLayout>

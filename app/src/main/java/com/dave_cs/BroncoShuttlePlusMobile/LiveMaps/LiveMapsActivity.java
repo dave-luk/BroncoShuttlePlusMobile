@@ -1,35 +1,35 @@
 package com.dave_cs.BroncoShuttlePlusMobile.LiveMaps;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
+import com.dave_cs.BroncoShuttlePlusMobile.Application.LiveMapData;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Location;
 import com.dave_cs.BroncoShuttlePlusServerUtil.LocationService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Package.DynamicRoutePackage;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Package.LiveMapDynamicPackageService;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Package.LiveMapStaticPackageService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Package.StaticRoutePackage;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,7 +45,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Observable;
+import java.util.Observer;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -57,7 +58,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCallback, Observer {
 
     private static final String TAG = "LiveMapsActivity";
     private final ArrayList<Integer> routeIDs = new ArrayList<>();
@@ -65,22 +66,31 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
     protected DrawerLayout drawerLayout;
     @Bind(R.id.liveMap_left_drawer)
     protected ListView leftDrawer;
+    @Bind(R.id.listView_error_box)
+    protected LinearLayout errorBoxLinearLayout;
     //TODO make this a dialog/bottom slide up view.
-    @Bind(R.id.liveMap_bottom_drawer)
-    protected FrameLayout rightDrawer;
+    @Bind(R.id.liveMap_bottom_sheet)
+    protected NestedScrollView bottomSheet;
+    private GoogleMap mMap;
     private List<StaticRoutePackage> staticRoutePackages = new ArrayList<>();
     private List<DynamicRoutePackage> dynamicRoutePackages = new ArrayList<>();
-    private GoogleMap mMap;
+    private boolean dynamicDataReady = false;
+
     private ArrayList<ArrayList<LatLng>> masterPolyList = new ArrayList<>();
     private ArrayList<ArrayList<Marker>> busMarkers = new ArrayList<>();
     private ArrayList<ArrayList<Marker>> stopMarkers = new ArrayList<>();
+    private ArrayList<PolylineOptions> masterRouteOptions = new ArrayList<>();
+    private int hasPoly = -1;
+
     private LatLngBounds.Builder stopBoundsBuilder = new LatLngBounds.Builder();
     private int stopBoundsCounter;
-    private ArrayList<PolylineOptions> masterRouteOptions = new ArrayList<>();
+
     //TODO: hardcoded colors can be converted to non limited ranges (needs some math algorithm)
     private String[] routeColors = {"#BBFF0000", "#BB0000FF", "#BBFFFF00", "#BB335933", "#BBFF00FF"};
-    private int hasPoly = -1;
-    private boolean dynamicDataReady = false;
+
+    private BottomSheetBehavior bottomSheetBehavior;
+
+    private boolean error = false;
 
     //TODO flickery update issue untackled.
     private Handler updateHandler = new Handler();
@@ -88,7 +98,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         @Override
         public void run() {
             if (hasPoly != -1) {
-                getDynamicPackages(hasPoly);
+                ((DataUpdateApplication) getApplication()).liveMapData.requestUpdate(hasPoly, routeIDs.get(hasPoly));
             }
         }
     };
@@ -99,16 +109,45 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         setContentView(R.layout.activity_live_maps);
         ButterKnife.bind(this);
 
+        ((DataUpdateApplication) getApplication()).liveMapData.addObserver(this);
+
+        if (((DataUpdateApplication) getApplication()).liveMapData.liveMapStaticRoutePackages.isEmpty()) {
+            Log.i(TAG, "empty!");
+            errorBoxLinearLayout.setVisibility(View.VISIBLE);
+            error = true;
+        } else {
+            staticRoutePackages = ((DataUpdateApplication) getApplication()).liveMapData.liveMapStaticRoutePackages;
+            parseStaticPackages();
+            finalizeList();
+            error = false;
+            errorBoxLinearLayout.setVisibility(View.GONE);
+        }
+
+        if (!((DataUpdateApplication) getApplication()).liveMapData.liveMapDynamicRoutePackages.isEmpty()) {
+            dynamicRoutePackages = ((DataUpdateApplication) getApplication()).liveMapData.liveMapDynamicRoutePackages;
+            dynamicDataReady = true;
+        } else {
+            ((DataUpdateApplication) getApplication()).liveMapData.requestUpdate(-1, 0);
+        }
+
+        //setup bottom sheet
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior.setHideable(true);
+        bottomSheet.post(new Runnable() {
+            @Override
+            public void run() {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+        });
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        getStaticPackages();
-        getDynamicPackages(-1);
-
-        //setting the initial right drawer closed
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+        //package prep
+//        getStaticPackages();
+//        getDynamicPackages(-1);
     }
 
     private List<String> getRouteNames() {
@@ -167,7 +206,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
         LocationService locationService = retrofit.create(LocationService.class);
 
-        Log.d(TAG, "the bus id passed is: " + info.getBusNumber());
+        Log.i(TAG, "the bus id passed is: " + info.getBusNumber());
         Call<Location> busCall = locationService.getLocation(null, info.getBusNumber());
         busCall.enqueue(new Callback<Location>() {
 
@@ -175,7 +214,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             public void onResponse(Call<Location> call, Response<Location> response) {
                 if (response.isSuccess()) {
                     Location l = response.body();
-                    Log.d(TAG, "location of bus is:" + l.parseLatLng());
+                    Log.i(TAG, "location of bus is:" + l.parseLatLng());
                     initMarker(info, l.parseLatLng(), "bus", packageIndex, index);
                 } else {
                     Log.e(TAG, response.code() + ":" + response.message());
@@ -193,7 +232,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     private void initMarker(Object o, LatLng location, String type, int packageIndex, int index) {
         if (mMap != null) {
-            Log.d(TAG, "Updated marker to: " + location);
+            Log.i(TAG, "Updated marker to: " + location);
             stopBoundsBuilder.include(location);
             stopBoundsCounter++;
             if (o instanceof StopInfo) {
@@ -229,7 +268,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
 
             if (!masterPolyList.get(index).isEmpty()) {
-                Log.d(TAG, "has poly line!");
+                Log.i(TAG, "has poly line!");
 
                 for (LatLng point : masterPolyList.get(index)) {
                     masterRouteOptions.get(index).add(point);
@@ -261,7 +300,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     private void updateBusLocation(int index) {
-        Log.d(TAG, "bus update: " + dynamicRoutePackages.get(index).buses.size());
+        Log.i(TAG, "bus update: " + dynamicRoutePackages.get(index).buses.size());
         if (index != -1)
             for (int i = 0; i < dynamicRoutePackages.get(index).buses.size(); i++)
                 getBusLocation(dynamicRoutePackages.get(index).buses.get(i), index, i);
@@ -289,10 +328,6 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    private View createInfo(Marker m) {
-        return new InfoView(this, m);
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -312,98 +347,37 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                //remove the selected object info
-                rightDrawer.removeAllViews();
                 //close all drawers
                 drawerLayout.closeDrawers();
                 //locking the right drawer
-                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+//                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+                bottomSheet.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                        bottomSheetBehavior.setPeekHeight(0);
+                    }
+                });
             }
         });
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                //unlocking right drawer
-                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END);
                 //adding new object info into drawer
-                rightDrawer.addView(createInfo(marker));
+                setInfoView(marker);
                 //show drawer
-                drawerLayout.openDrawer(GravityCompat.END);
+                bottomSheet.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        bottomSheetBehavior.setPeekHeight(200);
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    }
+                });
+
                 return true;
             }
         });
 
-    }
-
-    private void getStaticPackages() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://dave-cs.com")
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build();
-
-        LiveMapStaticPackageService liveMapStaticPackageService = retrofit.create(LiveMapStaticPackageService.class);
-        Call<List<StaticRoutePackage>> data = liveMapStaticPackageService.getStaticInfo();
-        data.enqueue(new Callback<List<StaticRoutePackage>>() {
-
-            @Override
-            public void onResponse(Call<List<StaticRoutePackage>> call, Response<List<StaticRoutePackage>> response) {
-                if (response.isSuccess()) {
-                    staticRoutePackages = response.body();
-
-                    parseStaticPackages();
-                    finalizeList();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<StaticRoutePackage>> call, Throwable t) {
-                Log.e(TAG, t.getLocalizedMessage());
-            }
-        });
-    }
-
-    private void getDynamicPackages(final int index) {
-        //configure longer Timeout...
-        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .readTimeout(60, TimeUnit.SECONDS)
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://dave-cs.com")
-                .client(okHttpClient)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build();
-
-        LiveMapDynamicPackageService liveMapDynamicPackageService = retrofit.create(LiveMapDynamicPackageService.class);
-        Call<List<DynamicRoutePackage>> data = liveMapDynamicPackageService.getDynamicInfo((index != -1) ? routeIDs.get(index) : -1);
-        data.enqueue(new Callback<List<DynamicRoutePackage>>() {
-
-            @Override
-            public void onResponse(Call<List<DynamicRoutePackage>> call, Response<List<DynamicRoutePackage>> response) {
-                Log.i(TAG, "Successfully get dynamic data");
-                if (response.isSuccess()) {
-                    if (index == -1) {
-                        dynamicRoutePackages = response.body();
-                        dynamicDataReady = true;
-                    } else {
-                        dynamicRoutePackages.set(index, response.body().get(0));
-                        if (LiveMapsActivity.this.hasPoly != -1) {
-                            updateBusLocation(hasPoly);
-                        }
-                        //schedule another one
-                        updateHandler.postDelayed(updateRunnable, 5000);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<DynamicRoutePackage>> call, Throwable t) {
-                Log.e(TAG + ".DP", t.getLocalizedMessage());
-                //schedule another one
-                updateHandler.postDelayed(updateRunnable, 5000);
-            }
-        });
     }
 
     /**
@@ -436,174 +410,111 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheet.post(new Runnable() {
+                @Override
+                public void run() {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            });
+        } else if (!error) {
+            moveTaskToBack(true);
+        } else {
+            super.onBackPressed();
+        }
     }
 
-    //infoView
-    private class InfoView extends LinearLayout {
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
 
-        private LinearLayout innerLayout;
+                Rect outRect = new Rect();
+                bottomSheet.getGlobalVisibleRect(outRect);
 
-        public InfoView(Context c, Marker m) {
-            super(c);
-            String[] data = m.getSnippet().split("[ ]+");
-            Log.d(TAG, "" + data[0] + "|" + data[1] + "|" + data[2]);
-            //main box
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    bottomSheet.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                            bottomSheetBehavior.setPeekHeight(0);
+                        }
+                    });
 
-            setBackgroundColor(Color.DKGRAY);
-            setOrientation(LinearLayout.VERTICAL);
-
-            LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            setWeightSum(100f);
-
-            setLayoutParams(linearLayoutParams);
-
-            //
-
-
-            //horizontal box
-            LinearLayout horiz = new LinearLayout(getContext());
-            horiz.setBackgroundColor(Color.parseColor("#b4cfb5"));
-            horiz.setOrientation(LinearLayout.HORIZONTAL);
-            horiz.setWeightSum(100f);
-
-            LinearLayout.LayoutParams horizParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
-            horizParams.weight = 20f;
-
-            horiz.setLayoutParams(horizParams);
-
-            //
-
-            //img view
-            ImageView img = new ImageView(getContext());
-            LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT);
-            imgParams.weight = 35f;
-            img.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            img.setBackgroundColor(Color.parseColor("#00000000"));
-            img.setImageResource(R.drawable.ic_bus_stop_icon);
-
-            img.setLayoutParams(imgParams);
-
-            //
-
-            //text view
-            TextView title = new TextView(getContext());
-            title.setText(m.getTitle());
-            title.setTextColor(Color.WHITE);
-            title.setBackgroundColor(Color.TRANSPARENT);
-            title.setSingleLine(false);
-            title.setGravity(Gravity.CENTER_VERTICAL);
-            title.setTextSize(24);
-
-            LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT);
-            titleParams.rightMargin = 5;
-            titleParams.weight = 65f;
-
-            title.setLayoutParams(titleParams);
-
-            //
-
-
-            horiz.addView(img);
-            horiz.addView(title);
-
-            innerLayout = new LinearLayout(getContext());
-            innerLayout.setBackgroundColor(Color.WHITE);
-            innerLayout.setOrientation(LinearLayout.VERTICAL);
-            LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
-            frameParams.weight = 80f;
-
-            innerLayout.setLayoutParams(frameParams);
-
-            switch (data[0]) {
-                case "stop":
-                    StopInfo stopInfo = getStopList(Integer.parseInt(data[1])).get(Integer.parseInt(data[2]));
-
-                    TextView routes = new TextView(getContext());
-                    routes.setText(String.format("Routes: %s", stopInfo.getOnRoute()));
-                    routes.setTextColor(Color.BLACK);
-                    routes.setTextSize(24);
-
-                    int timeToNext = stopInfo.getTimeToNext();
-                    String nextBusStr, nextTime;
-                    if (timeToNext < 0) {
-                        nextBusStr = "OUT OF SERVICE";
-                        nextTime = "";
-                    } else {
-                        nextBusStr = stopInfo.getNextBusOfRoute() + " bus in";
-                        nextTime = Integer.toString(timeToNext) + " s";
-                    }
-
-
-                    LinearLayout.LayoutParams routeParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    routes.setLayoutParams(routeParams);
-
-                    TextView nextBus = new TextView(getContext());
-                    nextBus.setText(nextBusStr);
-                    nextBus.setTextColor(Color.BLACK);
-                    nextBus.setTextSize(24);
-
-                    LinearLayout.LayoutParams nextBusParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    nextBus.setLayoutParams(nextBusParams);
-
-                    TextView nextBusTime = new TextView(getContext());
-                    nextBusTime.setText(nextTime);
-                    nextBusTime.setTextColor(Color.BLACK);
-                    nextBusTime.setTextSize(24);
-
-                    LinearLayout.LayoutParams nextBusTimeParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    nextBusTime.setLayoutParams(nextBusTimeParams);
-
-                    innerLayout.addView(routes);
-                    innerLayout.addView(nextBus);
-                    innerLayout.addView(nextBusTime);
-                    break;
-                case "bus":
-                    BusInfo busInfo = getBusList(Integer.parseInt(data[1])).get(Integer.parseInt(data[2]));
-
-                    TextView busRoute = new TextView(getContext());
-                    busRoute.setText(String.format("Route: %s", busInfo.getRoute()));
-                    busRoute.setTextColor(Color.BLACK);
-                    busRoute.setTextSize(24);
-
-                    LinearLayout.LayoutParams busRouteParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    busRoute.setLayoutParams(busRouteParams);
-
-                    String fullnessStr;
-                    int x;
-
-                    if ((x = busInfo.getFullness()) < 77) {
-                        fullnessStr = Integer.toString(x) + "% full. approx. " + (30 - x * (30) / 100) + "/30 seats left";
-                    } else {
-                        fullnessStr = Integer.toString(x) + "% full. Full seated.";
-                    }
-
-                    TextView fullness = new TextView(getContext());
-                    fullness.setText(fullnessStr);
-                    fullness.setTextColor(Color.BLACK);
-                    fullness.setTextSize(24);
-
-                    LinearLayout.LayoutParams fullnessParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    fullness.setLayoutParams(fullnessParams);
-
-                    TextView nextStop = new TextView(getContext());
-                    nextStop.setText(String.format("Next Stop: %s", busInfo.getNextStop()));
-                    nextStop.setTextColor(Color.BLACK);
-                    nextStop.setTextSize(24);
-
-                    LinearLayout.LayoutParams nextStopParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    nextStop.setLayoutParams(nextStopParams);
-
-                    innerLayout.addView(busRoute);
-                    innerLayout.addView(fullness);
-                    innerLayout.addView(nextStop);
-                    break;
+                }
             }
-
-            addView(horiz);
-            addView(innerLayout);
-
         }
 
+        return super.dispatchTouchEvent(event);
+    }
+
+    private void setInfoView(Marker m) {
+        String[] data = m.getSnippet().split("[ ]+");
+        Log.i(TAG, "" + data[0] + "|" + data[1] + "|" + data[2]);
+
+        ImageView img = (ImageView) findViewById(R.id.info_view_image);
+        img.setImageResource((data[0].equals("stop") ? R.drawable.ic_bus_stop_icon : R.mipmap.ic_bus_icon));
+
+        TextView titleText = (TextView) findViewById(R.id.info_view_title_text);
+        titleText.setText(m.getTitle());
+
+        TextView line1 = (TextView) findViewById(R.id.info_line_1);
+        TextView line2 = (TextView) findViewById(R.id.info_line_2);
+        TextView line3 = (TextView) findViewById(R.id.info_line_3);
+
+
+        switch (data[0]) {
+            case "stop":
+                StopInfo stopInfo = getStopList(Integer.parseInt(data[1])).get(Integer.parseInt(data[2]));
+
+                int timeToNext = stopInfo.getTimeToNext();
+                String nextBusStr, nextTime;
+                if (timeToNext < 0) {
+                    nextBusStr = "OUT OF SERVICE";
+                    nextTime = "";
+                } else {
+                    nextBusStr = stopInfo.getNextBusOfRoute() + " bus in";
+                    nextTime = Integer.toString(timeToNext) + " s";
+                }
+
+                line1.setText(String.format("Routes: %s", stopInfo.getOnRoute()));
+                line2.setText(nextBusStr);
+                line3.setText(nextTime);
+                break;
+            case "bus":
+                BusInfo busInfo = getBusList(Integer.parseInt(data[1])).get(Integer.parseInt(data[2]));
+
+                String fullnessStr;
+                int x;
+
+                if ((x = busInfo.getFullness()) < 77) {
+                    fullnessStr = Integer.toString(x) + "% full. approx. " + (30 - x * (30) / 100) + "/30 seats left";
+                } else {
+                    fullnessStr = Integer.toString(x) + "% full. Full seated.";
+                }
+
+                line1.setText(String.format("Route: %s", busInfo.getRoute()));
+                line2.setText(fullnessStr);
+                line3.setText(String.format("Next Stop: %s", busInfo.getNextStop()));
+                break;
+        }
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.i(TAG, "notified!");
+        if (observable instanceof LiveMapData) {
+            if (!((LiveMapData) observable).liveMapDynamicRoutePackages.isEmpty()) {
+                dynamicRoutePackages = ((LiveMapData) observable).liveMapDynamicRoutePackages;
+                dynamicDataReady = true;
+            }
+            if (staticRoutePackages.isEmpty()) {
+                staticRoutePackages = ((LiveMapData) observable).liveMapStaticRoutePackages;
+                error = false;
+                errorBoxLinearLayout.setVisibility(View.GONE);
+                parseStaticPackages();
+                finalizeList();
+            }
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.dave_cs.BroncoShuttlePlusServerUtil.Bus;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,6 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
 
     public void removeAll()
     {
-        headers.clear();
         headers.clear();
         notifyDataSetChanged();
     }
@@ -87,7 +85,6 @@ public class busViewExpandableListViewAdapter extends BaseExpandableListAdapter{
         }
 
         TextView header = (TextView) convertView.findViewById(R.id.busLblListHeader);
-        header.setTypeface(null, Typeface.BOLD);
         header.setText(headerTitle);
 
         return convertView;

@@ -24,6 +24,8 @@
             android:id="@+id/item_route_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:padding="2dp"
             android:text="Route"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -31,6 +33,7 @@
             android:id="@+id/item_route_bus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
             android:text="Bus"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
