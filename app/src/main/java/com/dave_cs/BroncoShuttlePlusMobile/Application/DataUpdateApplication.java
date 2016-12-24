@@ -12,6 +12,8 @@ public class DataUpdateApplication extends Application {
     public LiveMapData liveMapData;
     public DetailsViewData detailsViewData;
 
+    public ApplicationReadyRelay applicationReadyRelay;
+
     public static DataUpdateApplication getInstance() {
         return INSTANCE;
     }
@@ -22,5 +24,6 @@ public class DataUpdateApplication extends Application {
         liveMapData = new LiveMapData();
         detailsViewData = new DetailsViewData();
         INSTANCE = this;
+        applicationReadyRelay = new ApplicationReadyRelay();
     }
 }

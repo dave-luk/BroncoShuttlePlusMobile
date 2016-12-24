@@ -41,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="50dp" />
 
-    <WebView
+    <ImageView
         android:id="@+id/gif_view"
         android:layout_width="match_parent"
         android:layout_height="150dp"

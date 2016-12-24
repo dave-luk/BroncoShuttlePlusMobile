@@ -5,12 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.webkit.WebView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.ApplicationReadyRelay;
 import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewHeaderData;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.LiveMapData;
+import com.koushikdutta.ion.Ion;
+import com.koushikdutta.ion.builder.AnimateGifMode;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -22,92 +23,81 @@ import java.util.Observer;
 public class SplashActivity extends Activity implements Observer {
 
     private static final String TAG = "SplashActivity";
-    private static final int SPLASH_DURATION = 7000;
+    private static final int SPLASH_CHECK_DURATION = 50;
+    private int remainingTime = 7000;
 
-    private boolean mapReady = false;
-    private boolean detailsReady = false;
+    private boolean finished = false;
+
+    private DataUpdateApplication application = DataUpdateApplication.getInstance();
 
     private Handler transitionHandler = new Handler();
     private Runnable transitionRunnable = new Runnable() {
         @Override
         public void run() {
-            Intent transition = new Intent(SplashActivity.this, MainMenuActivity.class);
-            startActivity(transition);
-            finish();
+            if (remainingTime <= 0) {
+                Intent transition = new Intent(SplashActivity.this, MainMenuActivity.class);
+                startActivity(transition);
+                finish();
+            } else {
+                remainingTime -= SPLASH_CHECK_DURATION;
+                transitionHandler.postDelayed(this, SPLASH_CHECK_DURATION);
+            }
         }
     };
-
-//    private Thread transitionThread = new Thread(
-//            new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        Thread.sleep(SPLASH_DURATION);
-//                    } catch (InterruptedException e) {
-//                        //post now.
-//                    }
-//                    checkState.interrupt();
-//                    Intent transition = new Intent(SplashActivity.this, MainMenuActivity.class);
-//                    startActivity(transition);
-//                }
-//            });
-
-//    private Thread checkState = new Thread(new Runnable() {
-//        @Override
-//        public void run() {
-//            while (true) {
-//                if (mapReady && detailsReady) {
-//                    if(transitionThread.isAlive()) {
-//                        transitionThread.interrupt();
-//                    }else{
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//    });
-
-    private DataUpdateApplication application = DataUpdateApplication.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "created!");
-        application.liveMapData.addObserver(this);
-        application.detailsViewData.detailsViewHeaderData.addObserver(this);
+        //set up observer for ready
+        application.applicationReadyRelay.addObserver(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash_screen);
-        transitionHandler.postDelayed(transitionRunnable, SPLASH_DURATION);
+        //post setup.
+        transitionHandler.postDelayed(transitionRunnable, SPLASH_CHECK_DURATION);
 
-        WebView gifView = (WebView) findViewById(R.id.gif_view);
-        gifView.loadUrl("file:///android_asset/ic_animated_logo.gif");
-        gifView.getSettings().setBuiltInZoomControls(false);
-        gifView.getSettings().setDisplayZoomControls(false);
-        gifView.getSettings().setUseWideViewPort(true);
-        gifView.setInitialScale(1);
-        gifView.setPadding(0, 0, 0, 0);
+        //set up imageView for gif
+        ImageView gifView = (ImageView) findViewById(R.id.gif_view);
+        Ion.with(gifView)
+                .error(R.drawable.ic_bronco_shuttle)
+                .animateGif(AnimateGifMode.ANIMATE)
+                .load("file:///android_asset/ic_animated_logo.gif");
 
+        //set up progressbar
         ProgressBar loader = (ProgressBar) findViewById(R.id.loading);
         loader.setIndeterminate(true);
 
-//        transitionThread.run();
-//        checkState.run();
     }
 
 
     @Override
     public void update(Observable observable, Object data) {
-        if (observable instanceof DetailsViewHeaderData) {
-            detailsReady = true;
-        } else if (observable instanceof LiveMapData) {
-            if (!((LiveMapData) observable).liveMapStaticRoutePackages.isEmpty()) {
-                mapReady = true;
-            }
+        if (observable instanceof ApplicationReadyRelay) {
+            Log.i(TAG, "Updating!");
+            finished = true;
+            transitionHandler.removeCallbacks(transitionRunnable);
+            transitionHandler.post(transitionRunnable);
         }
     }
 
     @Override
     protected void onPause() {
-        transitionHandler.removeCallbacks(transitionRunnable);
+        Log.i(TAG, "pausing!");
+        if (!finished) {
+            transitionHandler.removeCallbacks(transitionRunnable);
+        }
         super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i(TAG, "Resuming!");
+        transitionHandler.postDelayed(transitionRunnable, SPLASH_CHECK_DURATION);
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.i(TAG, "Stopping!");
+        super.onStop();
     }
 }
