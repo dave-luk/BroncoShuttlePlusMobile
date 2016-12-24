@@ -7,11 +7,12 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,43 +59,37 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCallback, Observer {
+public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCallback, Observer {
 
     private static final String TAG = "LiveMapsActivity";
-    private final ArrayList<Integer> routeIDs = new ArrayList<>();
+    protected final ArrayList<Integer> routeIDs = new ArrayList<>();
+    @Nullable
     @Bind(R.id.liveMap_drawer_layout)
     protected DrawerLayout drawerLayout;
+    @Nullable
     @Bind(R.id.liveMap_left_drawer)
     protected ListView leftDrawer;
+    @Nullable
     @Bind(R.id.listView_error_box)
     protected LinearLayout errorBoxLinearLayout;
-    //TODO make this a dialog/bottom slide up view.
     @Bind(R.id.liveMap_bottom_sheet)
     protected NestedScrollView bottomSheet;
-    private GoogleMap mMap;
-    private List<StaticRoutePackage> staticRoutePackages = new ArrayList<>();
-    private List<DynamicRoutePackage> dynamicRoutePackages = new ArrayList<>();
-    private boolean dynamicDataReady = false;
+    protected GoogleMap mMap;
+    protected List<StaticRoutePackage> staticRoutePackages = new ArrayList<>();
+    protected List<DynamicRoutePackage> dynamicRoutePackages = new ArrayList<>();
+    protected boolean dynamicDataReady = false;
 
-    private ArrayList<ArrayList<LatLng>> masterPolyList = new ArrayList<>();
-    private ArrayList<ArrayList<Marker>> busMarkers = new ArrayList<>();
-    private ArrayList<ArrayList<Marker>> stopMarkers = new ArrayList<>();
-    private ArrayList<PolylineOptions> masterRouteOptions = new ArrayList<>();
-    private int hasPoly = -1;
-
-    private LatLngBounds.Builder stopBoundsBuilder = new LatLngBounds.Builder();
-    private int stopBoundsCounter;
-
+    protected ArrayList<ArrayList<LatLng>> masterPolyList = new ArrayList<>();
+    protected ArrayList<ArrayList<Marker>> busMarkers = new ArrayList<>();
+    protected ArrayList<ArrayList<Marker>> stopMarkers = new ArrayList<>();
+    protected ArrayList<PolylineOptions> masterRouteOptions = new ArrayList<>();
+    protected LatLngBounds.Builder stopBoundsBuilder = new LatLngBounds.Builder();
+    protected int stopBoundsCounter;
     //TODO: hardcoded colors can be converted to non limited ranges (needs some math algorithm)
-    private String[] routeColors = {"#BBFF0000", "#BB0000FF", "#BBFFFF00", "#BB335933", "#BBFF00FF"};
-
-    private BottomSheetBehavior bottomSheetBehavior;
-
-    private boolean error = false;
-
-    //TODO flickery update issue untackled.
-    private Handler updateHandler = new Handler();
-    private Runnable updateRunnable = new Runnable() {
+    protected String[] routeColors = {"#BBFF0000", "#BB0000FF", "#BBFFFF00", "#BB335933", "#BBFF00FF"};
+    protected BottomSheetBehavior bottomSheetBehavior;
+    private int hasPoly = -1;
+    protected Runnable updateRunnable = new Runnable() {
         @Override
         public void run() {
             if (hasPoly != -1) {
@@ -102,14 +97,22 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
             }
         }
     };
+    private boolean error = false;
+    //TODO flickery update issue untackled.
+    private Handler updateHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_live_maps);
-        ButterKnife.bind(this);
 
         ((DataUpdateApplication) getApplication()).liveMapData.addObserver(this);
+
+        onCreateLayout();
+    }
+
+    protected void onCreateLayout() {
+        setContentView(R.layout.activity_live_maps);
+        ButterKnife.bind(this);
 
         if (((DataUpdateApplication) getApplication()).liveMapData.liveMapStaticRoutePackages.isEmpty()) {
             Log.i(TAG, "empty!");
@@ -145,9 +148,6 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        //package prep
-//        getStaticPackages();
-//        getDynamicPackages(-1);
     }
 
     private List<String> getRouteNames() {
@@ -158,7 +158,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         return names;
     }
 
-    private void finalizeList() {
+    protected void finalizeList() {
         ArrayAdapter adapter = new ArrayAdapter<>(this, R.layout.item_live_map_drawer_item, R.id.item_liveMap_drawer_item, getRouteNames());
         leftDrawer.setAdapter(adapter);
         leftDrawer.setOnItemClickListener(new ListView.OnItemClickListener() {
@@ -174,7 +174,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         });
     }
 
-    private void parseStaticPackages() {
+    protected void parseStaticPackages() {
         for (StaticRoutePackage srp : staticRoutePackages) {
             //routeIDs
             routeIDs.add(srp.routeNumber);
@@ -230,11 +230,13 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     }
 
-    private void initMarker(Object o, LatLng location, String type, int packageIndex, int index) {
+    protected void initMarker(Object o, LatLng location, String type, int packageIndex, int index) {
         if (mMap != null) {
             Log.i(TAG, "Updated marker to: " + location);
-            stopBoundsBuilder.include(location);
-            stopBoundsCounter++;
+            if (type.equals("stop")) {
+                stopBoundsBuilder.include(location);
+                stopBoundsCounter++;
+            }
             if (o instanceof StopInfo) {
                 Log.i(TAG, "making stop markers");
                 stopMarkers.get(packageIndex).add(mMap.addMarker(new MarkerOptions().position(location).title(((StopInfo) o).getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_stop_icon)).snippet(type + " " + packageIndex + " " + index)));
@@ -299,14 +301,14 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    private void updateBusLocation(int index) {
+    protected void updateBusLocation(int index) {
         Log.i(TAG, "bus update: " + dynamicRoutePackages.get(index).buses.size());
         if (index != -1)
             for (int i = 0; i < dynamicRoutePackages.get(index).buses.size(); i++)
                 getBusLocation(dynamicRoutePackages.get(index).buses.get(i), index, i);
     }
 
-    private void pan(LatLngBounds b) {
+    protected void pan(LatLngBounds b) {
         if (b != null) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(b.getCenter(), 14.5f));
         }
@@ -448,7 +450,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
         return super.dispatchTouchEvent(event);
     }
 
-    private void setInfoView(Marker m) {
+    protected void setInfoView(Marker m) {
         String[] data = m.getSnippet().split("[ ]+");
         Log.i(TAG, "" + data[0] + "|" + data[1] + "|" + data[2]);
 
@@ -502,7 +504,7 @@ public class LiveMapsActivity extends FragmentActivity implements OnMapReadyCall
 
     @Override
     public void update(Observable observable, Object data) {
-        Log.i(TAG, "notified!");
+        Log.i(TAG, "Updating...");
         if (observable instanceof LiveMapData) {
             if (!((LiveMapData) observable).liveMapDynamicRoutePackages.isEmpty()) {
                 dynamicRoutePackages = ((LiveMapData) observable).liveMapDynamicRoutePackages;

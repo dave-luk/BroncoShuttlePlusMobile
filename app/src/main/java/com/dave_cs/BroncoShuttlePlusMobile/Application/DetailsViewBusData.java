@@ -48,9 +48,7 @@ public class DetailsViewBusData extends Observable {
             public void onResponse(Call<List<BusInfo>> call, Response<List<BusInfo>> response) {
                 if (response.isSuccess()) {
                     busInfoList.get(index).addAll(response.body());
-                    Log.i(TAG, "get bus on " + route);
                     setChanged();
-                    Log.d(TAG, "observers# : " + countObservers());
                     notifyObservers();
                 } else {
                     Log.e(TAG, response.code() + ":" + response.message());

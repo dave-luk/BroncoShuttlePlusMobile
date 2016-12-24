@@ -28,7 +28,7 @@ public class DetailsBusTabFragment extends android.support.v4.app.Fragment imple
 
     private static final String TAG = "DetailsBusTabFragment";
 
-    private ArrayList<String> routes = new ArrayList<>();
+    public ArrayList<String> routes = new ArrayList<>();
     private SwipeRefreshLayout swipeRefreshLayout;
     private ArrayList<ArrayList<BusInfo>> masterList = new ArrayList<>();
 
@@ -54,8 +54,7 @@ public class DetailsBusTabFragment extends android.support.v4.app.Fragment imple
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
-                ((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewBusData.requestBusUpdate(routes);
+                ((ViewPagerDetailsViewActivity) getActivity()).requestUpdate(0);
             }
         });
 
@@ -90,7 +89,6 @@ public class DetailsBusTabFragment extends android.support.v4.app.Fragment imple
         } else {
             error = true;
         }
-
 
         if (error) {
             ((ViewPagerDetailsViewActivity) getActivity()).errorBoxLinearLayout.setVisibility(View.VISIBLE);

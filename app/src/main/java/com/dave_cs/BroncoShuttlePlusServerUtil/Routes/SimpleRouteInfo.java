@@ -39,8 +39,16 @@ public class SimpleRouteInfo implements Comparable<SimpleRouteInfo> {
         return inService;
     }
 
+    public void setInService(boolean inService) {
+        this.inService = inService;
+    }
+
     public int getBusCount() {
         return busCount;
+    }
+
+    public void setBusCount(int count) {
+        this.busCount = count;
     }
 
     @Override

@@ -29,7 +29,7 @@ public class DetailsRouteTabFragment extends android.support.v4.app.Fragment imp
 
     private static final String TAG = "DetailsRouteTabFragment";
 
-    private ArrayList<String> routes = new ArrayList<>();
+    public ArrayList<String> routes = new ArrayList<>();
     private SwipeRefreshLayout swipeRefreshLayout;
     private ArrayList<SimpleRouteInfo> listItems = new ArrayList<>();
     private ArrayList<SimpleRouteInfo> searchList = new ArrayList<>();
@@ -59,8 +59,7 @@ public class DetailsRouteTabFragment extends android.support.v4.app.Fragment imp
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                adapter.clear();
-                ((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewRouteData.requestRouteUpdate(routes);
+                ((ViewPagerDetailsViewActivity) getActivity()).requestUpdate(0);
             }
         });
 
@@ -90,6 +89,7 @@ public class DetailsRouteTabFragment extends android.support.v4.app.Fragment imp
                 this.listItems = ((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewRouteData.simpleRouteInfoList;
                 adapter = new SimpleRouteInfoAdapter(getContext(), listItems);
                 listView.setAdapter(adapter);
+
                 error = false;
             }
         } else {
@@ -127,7 +127,6 @@ public class DetailsRouteTabFragment extends android.support.v4.app.Fragment imp
             if (((DetailsViewRouteData) observable).simpleRouteInfoList.size() == routes.size()) {
                 Log.i(TAG, "matching header size");
                 this.listItems = ((DetailsViewRouteData) observable).simpleRouteInfoList;
-                Log.i("Context: ", "c: " + getContext());
                 //if not detached.
                 if (getContext() != null) {
                     adapter = new SimpleRouteInfoAdapter(getContext(), listItems);

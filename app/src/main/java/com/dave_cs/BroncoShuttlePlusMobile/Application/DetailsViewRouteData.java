@@ -48,12 +48,14 @@ public class DetailsViewRouteData extends Observable {
                     for (SimpleRouteInfo s : simpleRouteInfoList) {
                         if (s.compareTo(response.body()) == 0) {
                             added = true;
+                            s.setInService(response.body().isInService());
+                            s.setBusCount(response.body().getBusCount());
                         }
 
                     }
-                    if (!added)
+                    if (!added) {
                         simpleRouteInfoList.add(response.body());
-
+                    }
                     Collections.sort(simpleRouteInfoList);
                     setChanged();
                     notifyObservers();

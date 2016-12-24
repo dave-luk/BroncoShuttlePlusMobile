@@ -21,16 +21,10 @@
             android:gravity="center">
 
             <ImageView
+                android:id="@+id/wheel_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_wheel_icon" />
-
-            <ProgressBar
-                android:id="@+id/loading"
-                style="@android:style/Widget.Material.ProgressBar.Large"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
 
         </FrameLayout>
 

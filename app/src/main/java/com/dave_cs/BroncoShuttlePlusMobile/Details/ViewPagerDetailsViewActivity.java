@@ -2,13 +2,10 @@ package com.dave_cs.BroncoShuttlePlusMobile.Details;
 
 import android.annotation.TargetApi;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -26,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 
 import java.util.ArrayList;
@@ -40,41 +38,33 @@ public class ViewPagerDetailsViewActivity extends AppCompatActivity implements S
 
     private static final String TAG = "VPDetailsViewActivity";
     private static final int NUM_PAGES = 3;
-
+    private static final int UPDATE_INTERVAL = 15000;
+    public final Handler updateHandler = new Handler();
     @Bind(R.id.details_pager)
     protected ViewPager mViewPager;
     @Bind(R.id.listView_error_box)
     protected LinearLayout errorBoxLinearLayout;
     private DetailsPageAdapter mPagerAdapter;
+    public final Runnable updateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            switch (mViewPager.getCurrentItem()) {
+                case 0:
+                    DataUpdateApplication.getInstance().detailsViewData.detailsViewRouteData.requestRouteUpdate(((DetailsRouteTabFragment) mPagerAdapter.getItem(0)).routes);
+                    break;
+                case 1:
+                    DataUpdateApplication.getInstance().detailsViewData.detailsViewStopData.requestStopUpdate();
+                    break;
+                case 2:
+                    DataUpdateApplication.getInstance().detailsViewData.detailsViewBusData.requestBusUpdate(((DetailsBusTabFragment) mPagerAdapter.getItem(2)).routes);
+                    break;
+            }
+            updateHandler.postDelayed(updateRunnable, UPDATE_INTERVAL);
+        }
+    };
     private android.support.v7.app.ActionBar actionBar;
     private MenuItem searchItem;
     private SearchView searchView;
-
-    private Location currLocation;
-    private LocationManager locationManager;
-    private boolean processing = false;
-    private LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            Log.i(TAG, "location received!");
-            currLocation = location;
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
-        }
-    };
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -85,7 +75,6 @@ public class ViewPagerDetailsViewActivity extends AppCompatActivity implements S
         errorBoxLinearLayout.setVisibility(View.GONE);
 
         handleIntent(getIntent());
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mPagerAdapter = new DetailsPageAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mPagerAdapter);
         //so ViewPager don't destroy any fragments...
@@ -95,6 +84,7 @@ public class ViewPagerDetailsViewActivity extends AppCompatActivity implements S
         if (actionBar != null) {
             actionBar.setDisplayShowCustomEnabled(true);
         }
+        requestUpdate(UPDATE_INTERVAL);
     }
 
     @Override
@@ -114,7 +104,7 @@ public class ViewPagerDetailsViewActivity extends AppCompatActivity implements S
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.options_menu, menu);
+        menuInflater.inflate(R.menu.details_view_options_menu, menu);
 
         searchItem = menu.findItem(R.id.search);
 
@@ -282,6 +272,23 @@ public class ViewPagerDetailsViewActivity extends AppCompatActivity implements S
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.i(TAG, "Pausing!");
+        updateHandler.removeCallbacks(updateRunnable);
+        super.onPause();
+    }
+
+    public void requestUpdate(int delay) {
+        updateHandler.removeCallbacks(updateRunnable);
+        updateHandler.postDelayed(updateRunnable, delay);
     }
 
     public class DetailsPageAdapter extends FragmentPagerAdapter {

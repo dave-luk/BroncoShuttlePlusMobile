@@ -13,10 +13,10 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dave_cs.BroncoShuttlePlusMobile.Details.ViewPagerDetailsViewActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.LiveMaps.LiveMapsActivity;
+import com.dave_cs.BroncoShuttlePlusMobile.Navigation.NavigationLiveMapActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.Options.OptionsActivity;
 
 import butterknife.Bind;
@@ -70,7 +70,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "navigation Pressed!");
-                Toast.makeText(MainMenuActivity.this, getResources().getText(R.string.menu_wip), Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MainMenuActivity.this, NavigationLiveMapActivity.class));
             }
         });
 
