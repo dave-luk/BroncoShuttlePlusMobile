@@ -4,10 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/nav_action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorDarkBg"
+        android:elevation="4dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:logo="@drawable/ic_live_map_icon"
+        app:title="Live Map" />
+
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/liveMap_drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/nav_action_bar">
 
         <!-- main frame -->
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -38,11 +50,16 @@
             android:layout_gravity="start"
             android:orientation="vertical">
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="10"
                 android:background="@color/colorDarkBg"
+                android:elevation="2dp"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -67,7 +84,8 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="80">
+                android:layout_weight="80"
+                android:elevation="6dp">
 
                 <ListView
                     android:id="@+id/liveMap_left_drawer"
@@ -112,6 +130,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="true"
+        android:elevation="2dp"
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
         <LinearLayout
@@ -123,7 +142,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="200px"
-                android:background="@color/colorAccent"
+                android:background="@color/colorDarkBg"
+                android:elevation="2dp"
                 android:orientation="horizontal">
 
                 <ImageView

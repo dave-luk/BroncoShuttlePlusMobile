@@ -59,4 +59,7 @@
     <string name="too_far_text">You are far far away! :(</string>
     <string name="error">Error!</string>
     <string name="splash_screen_label">Splash Screen</string>
+    <string name="title_activity_navigation">Navigation</string>
+    <string name="navigate">Navigate</string>
+    <string name="action_bar_title_navigation">Navigation</string>
 </resources>
