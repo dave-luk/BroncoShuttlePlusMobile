@@ -239,15 +239,21 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
             }
             if (o instanceof StopInfo) {
                 Log.i(TAG, "making stop markers");
-                stopMarkers.get(packageIndex).add(mMap.addMarker(new MarkerOptions().position(location).title(((StopInfo) o).getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_stop_icon)).snippet(type + " " + packageIndex + " " + index)));
+                Marker m = mMap.addMarker(new MarkerOptions().position(location).title(((StopInfo) o).getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_stop_icon)).snippet(type + " " + packageIndex + " " + index));
+                m.setTag(((StopInfo) o).getStopNumber());
+                stopMarkers.get(packageIndex).add(m);
             } else if (o instanceof BusInfo) {
                 try {
                     Marker curr = busMarkers.get(packageIndex).get(index);
-                    if (curr.getTitle().equals(((BusInfo) o).getBusName()))
+                    if (curr.getTag().equals(((BusInfo) o).getBusNumber())) {
                         curr.setPosition(location);
-                    else throw new Exception();
+                    } else {
+                        throw new Exception();
+                    }
                 } catch (Exception e) {
-                    busMarkers.get(packageIndex).add(mMap.addMarker(new MarkerOptions().position(location).title(((BusInfo) o).getBusName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon)).snippet(type + " " + packageIndex + " " + index)));
+                    Marker m = mMap.addMarker(new MarkerOptions().position(location).title(((BusInfo) o).getBusName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_icon)).snippet(type + " " + packageIndex + " " + index));
+                    m.setTag(((BusInfo) o).getBusNumber());
+                    busMarkers.get(packageIndex).add(m);
                 }
             }
         }

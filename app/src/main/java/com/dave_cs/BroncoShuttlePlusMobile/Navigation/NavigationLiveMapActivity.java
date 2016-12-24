@@ -64,6 +64,9 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
 
     private static final String TAG = "NavLiveMapActivity";
 
+    //This is in meters.
+    private static final int IN_RANGE_LIMIT = 2000;
+
     private Location currLocation;
     private LocationManager locationManager;
     private boolean processing = false;
@@ -321,7 +324,7 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
                                             location.setLatitude(s.getLat());
                                             location.setLongitude(s.getLng());
 
-                                            if (currLocation.distanceTo(location) <= 2000) {
+                                            if (currLocation.distanceTo(location) <= IN_RANGE_LIMIT) {
                                                 s.setDist(currLocation.distanceTo(location));
                                                 s.setBearing(currLocation.bearingTo(location));
                                                 inRangeList.add(s);
@@ -362,6 +365,22 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
                                             //show that marker's dialog..
                                             dialog.dismiss();
                                             Log.i(TAG, "would show marker...");
+                                            //TODO: show marker here...
+                                            StopLocation location = ((StopLocation) parent.getAdapter().getItem(position));
+                                            for (ArrayList<Marker> markerList : stopMarkers) {
+                                                for (Marker m : markerList) {
+                                                    if (m.getTag().equals(location.getStopNumber())) {
+                                                        setInfoView(m);
+                                                        bottomSheet.post(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                bottomSheetBehavior.setPeekHeight(200);
+                                                                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            }
                                         }
                                     });
                                 }
