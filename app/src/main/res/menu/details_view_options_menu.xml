@@ -3,15 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/search"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/ic_search_tint"
         android:title="@string/search_name"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="collapseActionView|always" />
-
-    <item
-        android:id="@+id/nearest"
-        android:icon="@drawable/ic_nearest"
-        android:title="@string/nearest_stop"
-        app:showAsAction="collapseActionView|always" />
-
 </menu>

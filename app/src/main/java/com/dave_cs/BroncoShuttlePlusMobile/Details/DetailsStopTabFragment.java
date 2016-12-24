@@ -14,22 +14,13 @@ import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
 import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewStopData;
 import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Location;
-import com.dave_cs.BroncoShuttlePlusServerUtil.LocationService;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfoFastScrollAdapter;
-import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by David on 1/20/2016.
@@ -64,8 +55,7 @@ public class DetailsStopTabFragment extends android.support.v4.app.Fragment impl
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                listAdapter.clear();
-                ((DataUpdateApplication) getActivity().getApplication()).detailsViewData.detailsViewStopData.requestStopUpdate();
+                ((ViewPagerDetailsViewActivity) getActivity()).requestUpdate(0);
             }
         });
 
@@ -113,44 +103,6 @@ public class DetailsStopTabFragment extends android.support.v4.app.Fragment impl
     @Override
     public void clear() {
         stopListView.setAdapter(listAdapter);
-    }
-
-    public int getStopCount() {
-        return stopInfoList.size();
-    }
-
-    public ArrayList<StopLocation> getStopLocations() {
-        final ArrayList<StopLocation> stopLocations = new ArrayList<>();
-
-        for (final StopInfo s : stopInfoList) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://dave-cs.com")
-                    .addConverterFactory(JacksonConverterFactory.create())
-                    .build();
-
-            LocationService locationService = retrofit.create(LocationService.class);
-
-            Call<Location> stopCall = locationService.getLocation(s.getStopNumber(), null);
-            stopCall.enqueue(new Callback<Location>() {
-
-                @Override
-                public void onResponse(Call<Location> call, Response<Location> response) {
-                    if (response.isSuccess()) {
-                        Location l = response.body();
-                        stopLocations.add(new StopLocation(s.getName(), s.getStopNumber(), l));
-                    } else {
-                        Log.e(TAG, response.code() + ":" + response.message());
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Location> call, Throwable t) {
-                    Log.e(TAG, t.getLocalizedMessage() + "::" + call.toString());
-                }
-            });
-        }
-
-        return stopLocations;
     }
 
     @Override
