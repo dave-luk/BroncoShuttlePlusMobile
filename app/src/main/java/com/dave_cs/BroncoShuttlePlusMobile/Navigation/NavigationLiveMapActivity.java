@@ -195,6 +195,7 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
         }
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(34.056781, -117.821071), 14.5f));
         mMap.getUiSettings().setScrollGesturesEnabled(false);
+        mMap.getUiSettings().setZoomGesturesEnabled(false);
         mMap.setMyLocationEnabled(true);
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -258,7 +259,9 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    //TODO: this advanced view needs work...
+    /*TODO: revamp this
+      TODO: add some sort of visual hint for loading.
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
