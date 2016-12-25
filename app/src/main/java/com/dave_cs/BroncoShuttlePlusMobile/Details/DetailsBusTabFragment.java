@@ -114,7 +114,9 @@ public class DetailsBusTabFragment extends android.support.v4.app.Fragment imple
             if (!((DetailsViewBusData) observable).busInfoList.isEmpty()) {
                 this.masterList = ((DetailsViewBusData) observable).busInfoList;
                 listAdapter.notifyDataSetChanged();
+
                 if (expandableListView != null) {
+                    expandableListView.setAdapter(listAdapter);
                     expandAll();
                 }
                 error = false;

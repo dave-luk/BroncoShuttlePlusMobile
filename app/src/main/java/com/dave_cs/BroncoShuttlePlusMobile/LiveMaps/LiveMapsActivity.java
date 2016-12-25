@@ -534,7 +534,9 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
             if (!((LiveMapData) observable).liveMapDynamicRoutePackages.isEmpty()) {
                 dynamicRoutePackages = ((LiveMapData) observable).liveMapDynamicRoutePackages;
                 dynamicDataReady = true;
-                updateBusLocation(hasPoly);
+                if (hasPoly != -1) {
+                    updateBusLocation(hasPoly);
+                }
             }
             if (staticRoutePackages.isEmpty() && !((LiveMapData) observable).liveMapStaticRoutePackages.isEmpty()) {
                 staticRoutePackages = ((LiveMapData) observable).liveMapStaticRoutePackages;

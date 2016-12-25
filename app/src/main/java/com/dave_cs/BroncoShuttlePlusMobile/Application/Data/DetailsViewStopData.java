@@ -56,6 +56,7 @@ public class DetailsViewStopData extends Observable {
             @Override
             public void onResponse(Call<List<StopInfo>> call, Response<List<StopInfo>> response) {
                 if (response.isSuccess()) {
+                    stopInfoList.clear();
                     stopInfoList.addAll(response.body());
                     Collections.sort(stopInfoList);
                     setChanged();
