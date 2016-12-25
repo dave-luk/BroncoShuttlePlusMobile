@@ -82,7 +82,11 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
 
         //Set up for info layouts.
         linearLayout = new LinearLayout(this);
-        linearLayout.setBackgroundColor(Color.WHITE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            linearLayout.setBackgroundColor(getResources().getColor(R.color.colorDarkBg, getTheme()));
+        } else {
+            linearLayout.setBackgroundColor(getResources().getColor(R.color.colorDarkBg));
+        }
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
@@ -106,6 +110,8 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
             fm.beginTransaction().replace(R.id.map_frag, mapFragment).commit();
         }
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.advBar);
+
         // get the type from bundles, write to lat-lng
         try {
             int stopID = getIntent().getExtras().getInt("stopNumber");
@@ -116,10 +122,12 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
                 name = stopName;
                 type = InfoType.STOP;
                 id = stopID;
+                toolbar.setNavigationIcon(R.drawable.ic_bus_stop_icon);
             } else if (busID != 0) {
                 name = busName;
                 type = InfoType.BUS;
                 id = busID;
+                toolbar.setNavigationIcon(R.drawable.ic_bus_icon_tint);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,8 +135,6 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
         getLocation();
         getInfo();
 
-        //TODO: make this nicer
-        Toolbar toolbar = (Toolbar) findViewById(R.id.advBar);
         toolbar.setTitle(name);
         setSupportActionBar(toolbar);
     }
@@ -216,7 +222,6 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
         TextView title = new TextView(this);
         title.setText(name);
         title.setTextColor(Color.WHITE);
-        title.setBackgroundColor(Color.parseColor("#b4cfb5"));
         title.setSingleLine(true);
         applyStyle(title, R.style.AppTheme_InfoWindowTitle);
         title.setEllipsize(TextUtils.TruncateAt.END);
@@ -227,6 +232,11 @@ public class DetailsAdvActivity extends AppCompatActivity implements OnMapReadyC
         title.setLayoutParams(titleParams);
 
         innerLayout = new LinearLayout(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            innerLayout.setBackgroundColor(getResources().getColor(R.color.colorLightBg, getTheme()));
+        } else {
+            innerLayout.setBackgroundColor(getResources().getColor(R.color.colorLightBg));
+        }
         innerLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
         frameParams.weight = 70f;

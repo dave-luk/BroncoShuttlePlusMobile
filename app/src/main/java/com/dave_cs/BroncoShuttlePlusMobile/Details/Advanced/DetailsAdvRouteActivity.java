@@ -108,6 +108,7 @@ public class DetailsAdvRouteActivity extends AppCompatActivity {
         //TODO: better actionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.advBar);
         toolbar.setTitle(routeName);
+        toolbar.setNavigationIcon(R.drawable.ic_adv_route_view_tint);
         setSupportActionBar(toolbar);
     }
 
