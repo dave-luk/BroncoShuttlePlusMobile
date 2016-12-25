@@ -37,8 +37,8 @@ public class DynamicRoutePackage implements Parcelable {
         routeNumber = in.readInt();
         stops = new ArrayList<>();
         buses = new ArrayList<>();
-        in.readList(buses, null);
-        in.readList(stops, null);
+        in.readList(buses, getClass().getClassLoader());
+        in.readList(stops, getClass().getClassLoader());
     }
 
     @Override

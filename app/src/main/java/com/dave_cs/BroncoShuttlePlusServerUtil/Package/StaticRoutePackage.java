@@ -38,8 +38,8 @@ public class StaticRoutePackage implements Parcelable {
         routeNumber = in.readInt();
         stops = new ArrayList<>();
         polyLine = new ArrayList<>();
-        in.readList(stops, null);
-        in.readList(polyLine, null);
+        in.readList(stops, getClass().getClassLoader());
+        in.readList(polyLine, getClass().getClassLoader());
     }
 
     @Override
