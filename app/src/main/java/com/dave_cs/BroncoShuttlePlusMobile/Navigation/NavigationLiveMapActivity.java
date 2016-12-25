@@ -24,12 +24,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.LiveMapData;
 import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.LiveMapData;
 import com.dave_cs.BroncoShuttlePlusMobile.LiveMaps.LiveMapsActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.LocationService;
@@ -103,9 +104,11 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
 
         if (((DataUpdateApplication) getApplication()).liveMapData.liveMapStaticRoutePackages.isEmpty()) {
             Log.i(TAG, "empty!");
+            error = true;
         } else {
             staticRoutePackages = ((DataUpdateApplication) getApplication()).liveMapData.liveMapStaticRoutePackages;
             parseStaticPackages();
+            error = false;
         }
 
         if (!((DataUpdateApplication) getApplication()).liveMapData.liveMapDynamicRoutePackages.isEmpty()) {
@@ -157,7 +160,7 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
 
             updateBusLocation(index);
 
-            updateRunnable.run();
+            updateHandler.post(updateRunnable);
 
             if (stopBoundsCounter > 0) {
                 LatLngBounds stopBounds = stopBoundsBuilder.build();
@@ -197,13 +200,15 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                bottomSheet.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                        bottomSheetBehavior.setPeekHeight(0);
-                    }
-                });
+                if (!error) {
+                    bottomSheet.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                            bottomSheetBehavior.setPeekHeight(0);
+                        }
+                    });
+                }
             }
         });
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -225,6 +230,8 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
 
         if (dynamicDataReady) {
             showRoutes();
+        } else if (error) {
+            displayError();
         }
     }
 
@@ -432,6 +439,25 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
         }
 
         return stopLocations;
+    }
+
+    private void displayError() {
+        ImageView img = (ImageView) findViewById(R.id.info_view_image);
+        img.setImageResource(R.drawable.ic_error_icon);
+
+        TextView titleText = (TextView) findViewById(R.id.info_view_title_text);
+        titleText.setText(R.string.info_view_error);
+
+        findViewById(R.id.info_view_content).setVisibility(View.GONE);
+
+        bottomSheet.post(new Runnable() {
+            @Override
+            public void run() {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheetBehavior.setPeekHeight(200);
+                bottomSheetBehavior.setHideable(false);
+            }
+        });
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.dave_cs.BroncoShuttlePlusMobile.Application;
+package com.dave_cs.BroncoShuttlePlusMobile.Application.Data;
 
 import android.util.Log;
 
@@ -55,5 +55,9 @@ public class DetailsViewHeaderData extends Observable {
                 notifyObservers();
             }
         });
+    }
+
+    public void requestHeaderUpdate() {
+        getHeaders();
     }
 }

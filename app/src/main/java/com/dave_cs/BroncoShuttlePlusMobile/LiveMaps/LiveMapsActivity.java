@@ -24,8 +24,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.LiveMapData;
 import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.LiveMapData;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Location;
@@ -62,13 +62,16 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCallback, Observer {
 
     private static final String TAG = "LiveMapsActivity";
+
+    private static final int UPDATE_INTERVAL = 10000;
+
     protected final ArrayList<Integer> routeIDs = new ArrayList<>();
     @Nullable
     @Bind(R.id.liveMap_drawer_layout)
     protected DrawerLayout drawerLayout;
     @Nullable
     @Bind(R.id.liveMap_left_drawer)
-    protected ListView leftDrawer;
+    protected ListView leftDrawerList;
     @Nullable
     @Bind(R.id.listView_error_box)
     protected LinearLayout errorBoxLinearLayout;
@@ -88,6 +91,8 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
     //TODO: hardcoded colors can be converted to non limited ranges (needs some math algorithm)
     protected String[] routeColors = {"#BBFF0000", "#BB0000FF", "#BBFFFF00", "#BB335933", "#BBFF00FF"};
     protected BottomSheetBehavior bottomSheetBehavior;
+    protected Handler updateHandler = new Handler();
+    protected boolean error = false;
     private int hasPoly = -1;
     protected Runnable updateRunnable = new Runnable() {
         @Override
@@ -97,9 +102,7 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
             }
         }
     };
-    private boolean error = false;
     //TODO flickery update issue untackled.
-    private Handler updateHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,8 +163,8 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
     protected void finalizeList() {
         ArrayAdapter adapter = new ArrayAdapter<>(this, R.layout.item_live_map_drawer_item, R.id.item_liveMap_drawer_item, getRouteNames());
-        leftDrawer.setAdapter(adapter);
-        leftDrawer.setOnItemClickListener(new ListView.OnItemClickListener() {
+        leftDrawerList.setAdapter(adapter);
+        leftDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (dynamicDataReady) {
@@ -293,7 +296,7 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
             updateBusLocation(index);
 
-            updateRunnable.run();
+            updateHandler.post(updateRunnable);
 
             if (stopBoundsCounter > 0) {
                 LatLngBounds stopBounds = stopBoundsBuilder.build();
@@ -400,6 +403,22 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     @Override
+    protected void onResume() {
+        Log.i(TAG, "resumed: " + error);
+        if (errorBoxLinearLayout != null) {
+            if (error) {
+                errorBoxLinearLayout.setVisibility(View.VISIBLE);
+            } else {
+                errorBoxLinearLayout.setVisibility(View.GONE);
+            }
+        }
+        if (hasPoly != -1) {
+            updateHandler.postDelayed(updateRunnable, UPDATE_INTERVAL);
+        }
+        super.onResume();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList("StaticPackages", (ArrayList<? extends Parcelable>) staticRoutePackages);
         outState.putParcelableArrayList("DynamicPackages", (ArrayList<? extends Parcelable>) dynamicRoutePackages);
@@ -418,7 +437,7 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onBackPressed() {
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED && !error) {
             bottomSheet.post(new Runnable() {
                 @Override
                 public void run() {
@@ -461,7 +480,7 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
         Log.i(TAG, "" + data[0] + "|" + data[1] + "|" + data[2]);
 
         ImageView img = (ImageView) findViewById(R.id.info_view_image);
-        img.setImageResource((data[0].equals("stop") ? R.drawable.ic_bus_stop_icon : R.mipmap.ic_bus_icon));
+        img.setImageResource((data[0].equals("stop") ? R.drawable.ic_bus_stop_icon : R.drawable.ic_bus_icon_tint));
 
         TextView titleText = (TextView) findViewById(R.id.info_view_title_text);
         titleText.setText(m.getTitle());
@@ -515,8 +534,9 @@ public class LiveMapsActivity extends AppCompatActivity implements OnMapReadyCal
             if (!((LiveMapData) observable).liveMapDynamicRoutePackages.isEmpty()) {
                 dynamicRoutePackages = ((LiveMapData) observable).liveMapDynamicRoutePackages;
                 dynamicDataReady = true;
+                updateBusLocation(hasPoly);
             }
-            if (staticRoutePackages.isEmpty()) {
+            if (staticRoutePackages.isEmpty() && !((LiveMapData) observable).liveMapStaticRoutePackages.isEmpty()) {
                 staticRoutePackages = ((LiveMapData) observable).liveMapStaticRoutePackages;
                 error = false;
                 errorBoxLinearLayout.setVisibility(View.GONE);

@@ -1,4 +1,4 @@
-package com.dave_cs.BroncoShuttlePlusMobile.Application;
+package com.dave_cs.BroncoShuttlePlusMobile.Application.Data;
 
 import android.util.Log;
 
@@ -25,11 +25,11 @@ public class DetailsViewBusData extends Observable {
 
     public ArrayList<ArrayList<BusInfo>> busInfoList = new ArrayList<>();
 
+    protected DetailsViewBusData() {
+    }
+
     protected DetailsViewBusData(List<String> routes) {
-        for (String r : routes) {
-            busInfoList.add(new ArrayList<BusInfo>());
-        }
-        requestBusUpdate(routes);
+        init(routes);
     }
 
     private void getBusInfo(final int index, final String route) {
@@ -61,6 +61,13 @@ public class DetailsViewBusData extends Observable {
             }
         });
 
+    }
+
+    public void init(List<String> routes) {
+        for (String r : routes) {
+            busInfoList.add(new ArrayList<BusInfo>());
+        }
+        requestBusUpdate(routes);
     }
 
     public void requestBusUpdate(List<String> routes) {

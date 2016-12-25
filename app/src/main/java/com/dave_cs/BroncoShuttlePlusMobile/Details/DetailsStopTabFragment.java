@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.DetailsViewStopData;
 import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewStopData;
 import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Stops.StopInfo;

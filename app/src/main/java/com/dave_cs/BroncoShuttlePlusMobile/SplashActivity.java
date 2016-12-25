@@ -41,6 +41,8 @@ public class SplashActivity extends Activity implements Observer {
             if (remainingTime <= 0) {
                 Intent transition = new Intent(SplashActivity.this, MainMenuActivity.class);
 
+                application.applicationReadyRelay.deleteObserver(SplashActivity.this);
+
                 startActivity(transition);
                 finish();
             } else {

@@ -1,4 +1,4 @@
-package com.dave_cs.BroncoShuttlePlusMobile.Application;
+package com.dave_cs.BroncoShuttlePlusMobile.Application.Data;
 
 import android.util.Log;
 
@@ -30,7 +30,7 @@ public class LiveMapData extends Observable {
     public List<DynamicRoutePackage> liveMapDynamicRoutePackages = new ArrayList<>();
     public List<StaticRoutePackage> liveMapStaticRoutePackages = new ArrayList<>();
 
-    protected LiveMapData() {
+    public LiveMapData() {
         getStaticPackages();
         getDynamicPackages(-1, 0);
     }
@@ -49,6 +49,7 @@ public class LiveMapData extends Observable {
             public void onResponse(Call<List<StaticRoutePackage>> call, Response<List<StaticRoutePackage>> response) {
                 if (response.isSuccess()) {
                     Log.i(TAG, "got Static packages");
+                    liveMapStaticRoutePackages.clear();
                     liveMapStaticRoutePackages.addAll(response.body());
                     setChanged();
                     notifyObservers();
@@ -59,7 +60,7 @@ public class LiveMapData extends Observable {
             @Override
             public void onFailure(Call<List<StaticRoutePackage>> call, Throwable t) {
                 Log.e(TAG, t.getLocalizedMessage());
-                liveMapStaticRoutePackages = null;
+                liveMapStaticRoutePackages.clear();
                 setChanged();
                 notifyObservers();
             }
@@ -100,13 +101,24 @@ public class LiveMapData extends Observable {
             @Override
             public void onFailure(Call<List<DynamicRoutePackage>> call, Throwable t) {
                 Log.e(TAG + ".DP", t.getLocalizedMessage());
-
+                liveMapDynamicRoutePackages.clear();
+                setChanged();
+                notifyObservers();
             }
         });
     }
 
     public void requestUpdate(int index, int routeId) {
         getDynamicPackages(index, routeId);
+    }
+
+    public boolean isComplete() {
+        return !(liveMapStaticRoutePackages.isEmpty() || liveMapDynamicRoutePackages.isEmpty());
+    }
+
+    public void reset() {
+        getStaticPackages();
+        getDynamicPackages(-1, 0);
     }
 }
 

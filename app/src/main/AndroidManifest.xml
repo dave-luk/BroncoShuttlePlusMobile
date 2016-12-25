@@ -119,6 +119,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.dave_cs.BroncoShuttlePlusMobile.MainMenuActivity" />
         </activity>
+
+        <receiver android:name=".Application.NetworkState.NetworkStateReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

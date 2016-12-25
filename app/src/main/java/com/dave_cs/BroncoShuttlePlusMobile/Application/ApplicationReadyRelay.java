@@ -1,5 +1,8 @@
 package com.dave_cs.BroncoShuttlePlusMobile.Application;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.DetailsViewHeaderData;
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.LiveMapData;
+
 import java.util.Observable;
 import java.util.Observer;
 

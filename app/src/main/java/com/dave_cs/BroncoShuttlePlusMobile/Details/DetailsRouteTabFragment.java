@@ -10,9 +10,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.DetailsViewHeaderData;
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.DetailsViewRouteData;
 import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewHeaderData;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewRouteData;
 import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvRouteActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Routes.SimpleRouteInfo;

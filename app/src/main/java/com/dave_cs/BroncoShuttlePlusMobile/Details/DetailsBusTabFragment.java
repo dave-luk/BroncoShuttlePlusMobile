@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.DetailsViewBusData;
+import com.dave_cs.BroncoShuttlePlusMobile.Application.Data.DetailsViewHeaderData;
 import com.dave_cs.BroncoShuttlePlusMobile.Application.DataUpdateApplication;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewBusData;
-import com.dave_cs.BroncoShuttlePlusMobile.Application.DetailsViewHeaderData;
 import com.dave_cs.BroncoShuttlePlusMobile.Details.Advanced.DetailsAdvActivity;
 import com.dave_cs.BroncoShuttlePlusMobile.R;
 import com.dave_cs.BroncoShuttlePlusServerUtil.Bus.BusInfo;
