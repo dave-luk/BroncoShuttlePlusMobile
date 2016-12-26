@@ -4,11 +4,12 @@
     <color name="colorPrimary">#888888</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#5f9461</color>
+    <color name="colorLightAccent">#1acc20</color>
+    <color name="colorDarkAccent">#348c4a</color>
     <color name="colorLightBg">#b4cfb5</color>
     <color name="colorDarkBg">#025516</color>
-    <color name="colorDarkAccent">#348c4a</color>
     <color name="colorAccentTransparent">#5109af32</color>
-    <color name="colorSplash">#FFFFFF</color>
+    <color name="colorSplash">#6cb48e</color>
     <color name="gold">#FFD700</color>
 
     <!-- bg color -->

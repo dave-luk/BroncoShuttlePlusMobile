@@ -15,8 +15,8 @@ android {
         applicationId "com.dave_cs.myapplication"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 11
-        versionName "4.1.0"
+        versionCode 12
+        versionName "4.1.1"
     }
     buildTypes {
         release {
