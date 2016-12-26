@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -26,6 +27,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,7 +69,7 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
 
     //This is in meters.
     private static final int IN_RANGE_LIMIT = 2000;
-
+    protected ProgressBar nearestProgressBar;
     private Location currLocation;
     private LocationManager locationManager;
     private boolean processing = false;
@@ -99,6 +101,14 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
         setContentView(R.layout.activity_navigation_live_maps);
 
         ButterKnife.bind(this);
+
+        nearestProgressBar = (ProgressBar) findViewById(R.id.nearest_func_progress_bar);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            nearestProgressBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.colorLightAccent, getTheme()), PorterDuff.Mode.SRC_IN);
+        } else {
+            nearestProgressBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.colorLightAccent), PorterDuff.Mode.SRC_IN);
+
+        }
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -303,19 +313,29 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
                 locationReq.start();
 
                 if (!DataUpdateApplication.getInstance().detailsViewData.detailsViewStopData.stopInfoList.isEmpty()) {
+                    nearestProgressBar.setVisibility(View.VISIBLE);
+                    Log.i(TAG, "progressbar set visible!");
+
                     final List<StopInfo> stopInfoList = DataUpdateApplication.getInstance().detailsViewData.detailsViewStopData.stopInfoList;
+                    nearestProgressBar.setMax(stopInfoList.size());
+
                     final ArrayList<StopLocation> stopList = getStopLocations(stopInfoList);
+
 
                     Thread listUpdate = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             //TODO: bad thing to do...
                             while (stopList.size() != stopInfoList.size() || currLocation == null) {
+                                // this makes the thread wait while getStoplocations() populate.
                             }
+
+                            nearestProgressBar.setProgress(0);
 
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    nearestProgressBar.setVisibility(View.GONE);
                                     if (ActivityCompat.checkSelfPermission(NavigationLiveMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(NavigationLiveMapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                         // TODO: Consider calling
                                         //    ActivityCompat#requestPermissions
@@ -381,6 +401,7 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
                                                 for (Marker m : markerList) {
                                                     if (m.getTag().equals(location.getStopNumber())) {
                                                         setInfoView(m);
+
                                                         bottomSheet.post(new Runnable() {
                                                             @Override
                                                             public void run() {
@@ -429,6 +450,13 @@ public class NavigationLiveMapActivity extends LiveMapsActivity {
                     if (response.isSuccess()) {
                         com.dave_cs.BroncoShuttlePlusServerUtil.Location l = response.body();
                         stopLocations.add(new StopLocation(s.getName(), s.getStopNumber(), l));
+                        if (nearestProgressBar != null && nearestProgressBar.getVisibility() == View.VISIBLE) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                nearestProgressBar.setProgress(nearestProgressBar.getProgress() + 1, true);
+                            } else {
+                                nearestProgressBar.setProgress(nearestProgressBar.getProgress() + 1);
+                            }
+                        }
                     } else {
                         Log.e(TAG, response.code() + ":" + response.message());
                     }

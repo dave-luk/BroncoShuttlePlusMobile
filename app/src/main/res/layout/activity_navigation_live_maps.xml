@@ -17,13 +17,25 @@
         app:logo="@drawable/ic_navigation_icon"
         app:title="@string/action_bar_title_navigation" />
 
+
+    <ProgressBar
+        android:id="@+id/nearest_func_progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_below="@id/nav_action_bar"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:elevation="2dp"
+        android:visibility="gone" />
+
+
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/map"
         class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/nav_action_bar"
+        android:layout_below="@id/nearest_func_progress_bar"
         tools:context="com.dave_cs.BroncoShuttlePlusMobile.Navigation.NavigationLiveMapActivity" />
 
     <android.support.v4.widget.NestedScrollView
